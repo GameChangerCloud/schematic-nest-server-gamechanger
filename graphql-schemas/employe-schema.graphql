@@ -1,0 +1,18 @@
+type Employe {
+  id: ID!
+  email: String!
+  firstName: String
+  lastName: String
+  login: String!
+  password: String!
+  workInfo : Work
+}
+
+type Work {
+  id: ID!
+  job: String
+  salary: String
+  empl: [Employe]
+}
+
+

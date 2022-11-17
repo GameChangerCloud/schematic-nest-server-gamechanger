@@ -1,0 +1,9 @@
+{
+  "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "generate": {
+      "description": "Main schematic for all the server generation",
+      "factory": "./generate/index#generate"
+    }
+  }
+}
