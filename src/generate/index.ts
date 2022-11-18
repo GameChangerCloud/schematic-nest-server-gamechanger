@@ -4,7 +4,9 @@ import {
   schemaParser,
   getRelations,
   typesGenerator,
+  Type,
 } from 'easygraphql-parser-gamechanger';
+import { createResolverQuery } from './templates/query.resolver';
 const fs = require('fs');
 const path = require('path');
 
@@ -36,19 +38,46 @@ export function generate(_options: any): Rule {
      * NEST SERVER GENERATION
      */
 
+    const rules: Rule[] = [];
+
+    types.forEach((type) => {
+      createService(type, strings, _options, types);
+      createResolverQuery(type, _tree, _options.name);
+      rules.push(createService(type, strings, _options, types));
+      
+    // rules.push(createModule(type, strings, _options, types));
+    })
+
     const templateSource = apply(url('./app'), [
       template({
         ...strings,
         ..._options,
         types,
       }),
-      move(`test-schematic-nest-js/` as string),
+      move(`${_options.name}/` as string),
     ]);
 
     console.log('App generated');
 
+    console.log('+++++/' + rules);
+    console.log('+++++-' + chain(rules));
     return chain([mergeWith(templateSource)]);
   };
+}
+
+function createService(type: Type, strings: any, _options: any, types: Type[]) {
+ 
+  const templateSource = apply(url('./app/TestBis/hello'), [
+    template({
+      type,
+      ...strings,
+      ..._options,
+      types,
+    }),
+    move(`${_options.name}/` as string),
+  ]);
+
+  return mergeWith(templateSource);
 }
 
 
