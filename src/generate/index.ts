@@ -4,9 +4,10 @@ import {
   schemaParser,
   getRelations,
   typesGenerator,
-  Type,
 } from 'easygraphql-parser-gamechanger';
 import { createResolverQuery } from './templates/query.resolver';
+import { deleteDto } from './templates/src/application/services/dto/delete.dto';
+import { createServiceInterface } from './templates/src/domain/service.interface';
 const fs = require('fs');
 const path = require('path');
 
@@ -38,12 +39,16 @@ export function generate(_options: any): Rule {
      * NEST SERVER GENERATION
      */
 
-    const rules: Rule[] = [];
+    //const rules: Rule[] = [];
 
     types.forEach((type) => {
-      createService(type, strings, _options, types);
-      createResolverQuery(type, _tree, _options.name);
-      rules.push(createService(type, strings, _options, types));
+      if (type.type !== 'EnumTypeDefinition') {
+        createResolverQuery(type, _tree, _options.name);
+        createServiceInterface(type, _tree, _options.name);
+        deleteDto(type, _tree, _options.name);
+      }
+      
+      //rules.push(createService(type, strings, _options, types));
       
     // rules.push(createModule(type, strings, _options, types));
     })
@@ -59,27 +64,11 @@ export function generate(_options: any): Rule {
 
     console.log('App generated');
 
-    console.log('+++++/' + rules);
-    console.log('+++++-' + chain(rules));
+    // console.log('+++++/' + rules);
+    // console.log('+++++-' + chain(rules));
     return chain([mergeWith(templateSource)]);
   };
 }
-
-function createService(type: Type, strings: any, _options: any, types: Type[]) {
- 
-  const templateSource = apply(url('./app/TestBis/hello'), [
-    template({
-      type,
-      ...strings,
-      ..._options,
-      types,
-    }),
-    move(`${_options.name}/` as string),
-  ]);
-
-  return mergeWith(templateSource);
-}
-
 
 /**
  * Parse graphQL schema with easygraphqlparser from gamechanger-parser
@@ -94,7 +83,7 @@ function createService(type: Type, strings: any, _options: any, types: Type[]) {
   gcpFileName;
 
   const schemaCode = fs.readFileSync(
-    path.join(__dirname, '../../graphql-schemas', `employe-schema.graphql`),
+    path.join(__dirname, '../../graphql-schemas', `astronauts.graphql`),
     'utf8'
   );
 

@@ -1,17 +1,17 @@
 import { Resolver, Args, Query, ID } from '@nestjs/graphql';
-    import { Employe } from 'adapters/typeorm/entities/employe.model';
-    import { EmployeGetOneOutput } from 'application/services/dto/planet/planet-getOne.dto';
+    import { Astronaut } from 'adapters/typeorm/entities/astronaut.model';
+    import { AstronautGetOneOutput } from 'application/services/dto/planet/planet-getOne.dto';
     import {
-      EmployesPagination,
-      EmployesPaginationArgs,
+      AstronautsPagination,
+      AstronautsPaginationArgs,
     } from 'application/services/dto/planet/planet-pagination.dto';
-    import { EmployeService } from 'application/services/planet.service';
+    import { AstronautService } from 'application/services/planet.service';
     
-    @Resolver(Employe)
-    export class EmployeQueriesResolver {
-      constructor(private readonly planetsService: EmployeService) {}
+    @Resolver(Astronaut)
+    export class AstronautQueriesResolver {
+      constructor(private readonly planetsService: AstronautService) {}
     
-      @Query(() => EmployesPagination)
+      @Query(() => AstronautsPagination)
       async planetsPagination(@Args() args: PlanetsPaginationArgs) {
         return this.planetsService.planetsPagination(args);
       }

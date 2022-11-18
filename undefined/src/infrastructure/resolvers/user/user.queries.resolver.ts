@@ -1,17 +1,17 @@
 import { Resolver, Args, Query, ID } from '@nestjs/graphql';
-    import { Work } from 'adapters/typeorm/entities/work.model';
-    import { WorkGetOneOutput } from 'application/services/dto/planet/planet-getOne.dto';
+    import { User } from 'adapters/typeorm/entities/user.model';
+    import { UserGetOneOutput } from 'application/services/dto/planet/planet-getOne.dto';
     import {
-      WorksPagination,
-      WorksPaginationArgs,
+      UsersPagination,
+      UsersPaginationArgs,
     } from 'application/services/dto/planet/planet-pagination.dto';
-    import { WorkService } from 'application/services/planet.service';
+    import { UserService } from 'application/services/planet.service';
     
-    @Resolver(Work)
-    export class WorkQueriesResolver {
-      constructor(private readonly planetsService: WorkService) {}
+    @Resolver(User)
+    export class UserQueriesResolver {
+      constructor(private readonly planetsService: UserService) {}
     
-      @Query(() => WorksPagination)
+      @Query(() => UsersPagination)
       async planetsPagination(@Args() args: PlanetsPaginationArgs) {
         return this.planetsService.planetsPagination(args);
       }

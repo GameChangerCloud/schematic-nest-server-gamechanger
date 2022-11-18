@@ -2,18 +2,12 @@ import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 
-/**
- * Create service file in the new project for each entity
- * @param types Detailed JSON about the graphQL schema used for the generation
- * @param _tree Current tree where files are created
- * @param projectName name of the generated project
- */
 export function createResolverQuery(
   type: Type,
   _tree: Tree,
   projectName: string
 ) {
-    let serviceFileTemplate = `import { Resolver, Args, Query, ID } from '@nestjs/graphql';
+    let fileTemplate = `import { Resolver, Args, Query, ID } from '@nestjs/graphql';
     import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';
     import { ${type.typeName}GetOneOutput } from 'application/services/dto/planet/planet-getOne.dto';
     import {
@@ -41,9 +35,11 @@ export function createResolverQuery(
     `;
     // Create Service file
     _tree.create(
-      `${projectName}/src/app/store/service/${strings.camelize(
+      `${projectName}/src/infrastructure/resolvers/${strings.camelize(
         type.typeName
-      )}.resolver.ts`,
-      serviceFileTemplate
+      )}/${strings.camelize(
+        type.typeName
+      )}.queries.resolver.ts`,
+      fileTemplate
     );
 }
