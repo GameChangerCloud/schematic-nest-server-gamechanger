@@ -10,9 +10,9 @@ import { createDto } from './templates/src/application/services/dto/create.dto';
 import { deleteDto } from './templates/src/application/services/dto/delete.dto';
 import { paginationEntityDto } from './templates/src/application/services/dto/entity.pagination.dto';
 import { getOneDto } from './templates/src/application/services/dto/getOne.dto';
-//import { paginationDto } from './templates/src/application/services/dto/pagination.dto';
 import { updateDto } from './templates/src/application/services/dto/update.dto';
 import { createServiceInterface } from './templates/src/domain/service.interface';
+import { createModule } from './templates/src/infrastructure/module';
 const fs = require('fs');
 const path = require('path');
 
@@ -48,6 +48,7 @@ export function generate(_options: any): Rule {
 
     types.forEach((type) => {
       if (type.type !== 'EnumTypeDefinition') {
+        createModule(type, _tree, _options.name);
         createResolverQuery(type, _tree, _options.name);
         createServiceInterface(type, _tree, _options.name);
         createDto(type, _tree, _options.name);
@@ -55,7 +56,6 @@ export function generate(_options: any): Rule {
         getOneDto(type, _tree, _options.name);
         updateDto(type, _tree, _options.name);
         paginationEntityDto(type, _tree, _options.name);
-        //paginationDto(_tree, _options.name);
       }
       
       //rules.push(createService(type, strings, _options, types));

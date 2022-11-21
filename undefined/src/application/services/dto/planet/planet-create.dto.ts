@@ -6,19 +6,18 @@ import { Astronaut } from 'adapters/typeorm/entities/astronaut.model';
 @InputType()
 export class PlanetCreateInput {
   @Field(() => String)
-  name : string
+  name: string
 
   @Field(() => String)
-  picture : string
+  picture: string
 
   @Field(() => Number)
-  points : int
+  points: number
 
-
-    @Field(() => [String], { nullable: true })
-    astronautIds?: Astronaut['id'][] | null;
+  @Field(() => [String], { nullable: true })
+  astronautIds?: Astronaut['id'][] | null;
         
-    }
+}
 
 @ObjectType()
 export class PlanetCreateOutput {

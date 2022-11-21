@@ -1,21 +1,20 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 
 import { User } from 'adapters/typeorm/entities/user.model';
-import { Role } from 'adapters/typeorm/entities/role.model';
+import { Role } from 'adapters/typeorm/entities/role.enum';
 
 @InputType()
 export class UserCreateInput {
   @Field(() => String)
-  username : string
+  username: string
 
   @Field(() => String)
-  email : string
+  email: string
 
-
-    @Field(() => [String], { nullable: true })
-    roleIds?: Role['id'][] | null;
+  @Field(() => [Role])
+  roles: Role[];
         
-    }
+}
 
 @ObjectType()
 export class UserCreateOutput {

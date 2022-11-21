@@ -39,10 +39,15 @@ ${strings.camelize(type.typeName)}: ${type.typeName};
 
 function computeImportsTemplate(type: Type): string {
   let importTemplate = ``;
-  const relationships = type.fields.filter(field => field.relation === true && !field.isDeprecated);
+  const enums = type.fields.filter(field => field.isEnum && !field.isDeprecated);
+  const relationships = type.fields.filter(field => field.relation && !field.isDeprecated && !field.isEnum);
+  enums.forEach((enumField) => {
+    const enumTemplate = `\nimport { ${enumField.type} } from 'adapters/typeorm/entities/${strings.camelize(enumField.type)}.enum';`;
+    importTemplate += enumTemplate;
+  })
   relationships.forEach((relationship) => {
-    const scalarTemplate = `\nimport { ${relationship.type} } from 'adapters/typeorm/entities/${relationship.type.toLowerCase()}.model';`;
-    importTemplate += scalarTemplate;
+    const relationshipTemplate = `\nimport { ${relationship.type} } from 'adapters/typeorm/entities/${strings.camelize(relationship.type)}.model';`;
+    importTemplate += relationshipTemplate;
   })
 
   return importTemplate;
@@ -50,7 +55,7 @@ function computeImportsTemplate(type: Type): string {
 
 function computeScalarsTemplate(type: Type): string {
   let importTemplate = ``;
-  const scalars = type.fields.filter(field => field.relation === false && !field.isDeprecated && field.type != "ID");
+  const scalars = type.fields.filter(field => !field.relation && !field.isDeprecated && field.type != "ID");
   scalars.forEach((scalar) => {
     const arrayCharacter = scalar.isArray ? "[]" : "";
     const noNullOption = scalar.noNull ? "" : ", { nullable: true }";
@@ -71,8 +76,8 @@ function computeScalarsTemplate(type: Type): string {
         scalarTypeGQL = "Other"
     }
 
-const scalarTemplate = `  @Field(() => ${scalarTypeGQL}${noNullOption})
-  ${scalar.name}${noNullCharacter} : ${scalar.type.toLowerCase()}${arrayCharacter}
+    const scalarTemplate = `  @Field(() => ${scalarTypeGQL}${noNullOption})
+  ${scalar.name}${noNullCharacter}: ${strings.camelize(scalarTypeGQL)}${arrayCharacter}
 
 `;
     importTemplate += scalarTemplate;
@@ -82,24 +87,40 @@ const scalarTemplate = `  @Field(() => ${scalarTypeGQL}${noNullOption})
 }
 
 function computeRelationshipsTemplate(type: Type): string {
-  let importTemplate = ``;
-  const relationships = type.fields.filter(field => field.relation === true && !field.isDeprecated);
-  relationships.forEach((relationship) => {
-  let scalarTemplate;
-  if (relationship.isArray) {
-    scalarTemplate = `
-    @Field(() => [String], { nullable: true })
-    ${relationship.type.toLowerCase()}Ids?: ${relationship.type}['id'][] | null;
+  let relationshipsAndEnumsTemplate = ``;
+  const enums = type.fields.filter(field => field.isEnum && !field.isDeprecated);
+  const relationships = type.fields.filter(field => field.relation && !field.isDeprecated && !field.isEnum);
+  enums.forEach((enumField) => {
+    let enumsTemplate;
+    if (enumField.isArray) {
+      enumsTemplate = `  @Field(() => [${enumField.type}])
+  ${enumField.name}: ${enumField.type}[];
         
-    `;
+`;
+    } else {
+      enumsTemplate = `  @Field(() => ${enumField.type})
+  ${enumField.name}: ${enumField.type};
+          
+`;
+    }
+    relationshipsAndEnumsTemplate += enumsTemplate;
+  });
+    
+  relationships.forEach((relationship) => {
+    let relationshipsTemplate;
+    if (relationship.isArray) {
+      relationshipsTemplate = `  @Field(() => [String], { nullable: true })
+  ${strings.camelize(relationship.type)}Ids?: ${relationship.type}['id'][] | null;
+        
+`;
   } else {
-    scalarTemplate = `  @Field(() => String, { nullable: true })
-  ${relationship.type.toLowerCase()}Id?: ${relationship.type}['id'] | null;
+    relationshipsTemplate = `  @Field(() => String, { nullable: true })
+  ${strings.camelize(relationship.type)}Id?: ${relationship.type}['id'] | null;
         
 `;
   }
-  importTemplate += scalarTemplate;
+  relationshipsAndEnumsTemplate += relationshipsTemplate;
   });
 
-  return importTemplate;
+  return relationshipsAndEnumsTemplate;
 }
