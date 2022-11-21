@@ -2,7 +2,7 @@ import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 
-export function deleteDto(
+export function createDeleteDto(
     type: Type,
     _tree: Tree,
     projectName: string
@@ -13,9 +13,8 @@ import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(t
 @ObjectType()
 export class ${type.typeName}DeleteOutput {
   @Field(() => ID)
-  ${strings.camelize(type.typeName)}: ${type.typeName}['id'];
+  ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'];
 }
-
     `;
 
     // Create Service file

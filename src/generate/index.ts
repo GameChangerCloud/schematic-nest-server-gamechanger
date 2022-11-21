@@ -6,11 +6,13 @@ import {
   typesGenerator,
 } from 'easygraphql-parser-gamechanger';
 import { createResolverQuery } from './templates/query.resolver';
-import { createDto } from './templates/src/application/services/dto/create.dto';
-import { deleteDto } from './templates/src/application/services/dto/delete.dto';
-import { paginationEntityDto } from './templates/src/application/services/dto/entity.pagination.dto';
-import { getOneDto } from './templates/src/application/services/dto/getOne.dto';
-import { updateDto } from './templates/src/application/services/dto/update.dto';
+import { createCreateDto } from './templates/src/application/services/dto/create.dto';
+import { createDeleteDto } from './templates/src/application/services/dto/delete.dto';
+import { createEntityPaginationDto } from './templates/src/application/services/dto/entity.pagination.dto';
+import { createFieldPaginationDto } from './templates/src/application/services/dto/field.pagination.dto';
+import { createGetOneDto } from './templates/src/application/services/dto/getOne.dto';
+import { createUpdateDto } from './templates/src/application/services/dto/update.dto';
+import { createService } from './templates/src/application/services/service';
 import { createServiceInterface } from './templates/src/domain/service.interface';
 import { createModule } from './templates/src/infrastructure/module';
 const fs = require('fs');
@@ -51,11 +53,18 @@ export function generate(_options: any): Rule {
         createModule(type, _tree, _options.name);
         createResolverQuery(type, _tree, _options.name);
         createServiceInterface(type, _tree, _options.name);
-        createDto(type, _tree, _options.name);
-        deleteDto(type, _tree, _options.name);
-        getOneDto(type, _tree, _options.name);
-        updateDto(type, _tree, _options.name);
-        paginationEntityDto(type, _tree, _options.name);
+        createCreateDto(type, _tree, _options.name);
+        createDeleteDto(type, _tree, _options.name);
+        createGetOneDto(type, _tree, _options.name);
+        createUpdateDto(type, _tree, _options.name);
+        createEntityPaginationDto(type, _tree, _options.name);
+        const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.isArray && field.relationType)
+        if (relatedFields.length > 0) {
+          relatedFields.forEach((relatedField) => {
+            createFieldPaginationDto(type, relatedField, _tree, _options.name);
+          });
+        }
+        createService(type, _tree, _options.name);
       }
       
       //rules.push(createService(type, strings, _options, types));

@@ -1,8 +1,9 @@
 import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
+const pluralize = require("pluralize");
 
-export function createDto(
+export function createCreateDto(
     type: Type,
     _tree: Tree,
     projectName: string
@@ -110,12 +111,12 @@ function computeRelationshipsTemplate(type: Type): string {
     let relationshipsTemplate;
     if (relationship.isArray) {
       relationshipsTemplate = `  @Field(() => [String], { nullable: true })
-  ${strings.camelize(relationship.type)}Ids?: ${relationship.type}['id'][] | null;
+  ${strings.camelize(pluralize(relationship.name, 1))}Ids?: ${relationship.type}['id'][] | null;
         
 `;
   } else {
     relationshipsTemplate = `  @Field(() => String, { nullable: true })
-  ${strings.camelize(relationship.type)}Id?: ${relationship.type}['id'] | null;
+  ${strings.camelize(relationship.name)}Id?: ${relationship.type}['id'] | null;
         
 `;
   }

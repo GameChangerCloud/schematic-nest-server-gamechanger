@@ -2,7 +2,7 @@ import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 
-export function updateDto(
+export function createUpdateDto(
     type: Type,
     _tree: Tree,
     projectName: string

@@ -46,7 +46,7 @@ export class ${type.typeName}Module {}
 }
 
 function computeRelationalTemplates(type: Type): string[] {
-    const relationalFields = type.fields.filter((field) => field.relation && field.relationType !== "selfJoinOne" && field.relationType !== "selfJoinMany" && !field.isEnum);
+    const relationalFields = type.fields.filter((field) => field.relation && field.relationType !== "selfJoinOne" && field.relationType !== "selfJoinMany" && !field.isEnum && !field.isDeprecated);
     let [forwardRefImport, forwardReferencedModules, referencedModules] = computeForwardReferences(type, relationalFields);
     let entitiesImport = "";
     let fieldResolverImport = "";

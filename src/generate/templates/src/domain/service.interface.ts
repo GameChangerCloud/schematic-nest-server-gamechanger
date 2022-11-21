@@ -8,8 +8,8 @@ export function createServiceInterface(
     _tree: Tree,
     projectName: string
 ) {
-    let fileTemplate = `
-import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';
+    let [fieldPagination, importPaginationArgs, importFieldPagination] = computeFieldPagination(type);
+    let fileTemplate = `import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';${importPaginationArgs}${importFieldPagination}
 import {
   ${type.typeName}CreateInput,
   ${type.typeName}CreateOutput,
@@ -35,13 +35,11 @@ export interface I${type.typeName}Service {
 
   ${strings.camelize(type.typeName)}Delete(${strings.camelize(type.typeName)}Id: ${type.typeName}['id']): Promise<${type.typeName}DeleteOutput>;
 
-  ${strings.camelize(pluralize(type.typeName))}sPagination(
-    args: ${type.typeName}sPaginationArgs,
-  ): Promise<${type.typeName}sPagination>;
+  ${strings.camelize(pluralize(type.typeName))}Pagination(args: ${pluralize(type.typeName)}PaginationArgs): Promise<${type.typeName}sPagination>;
 
   ${strings.camelize(type.typeName)}GetById(id: ${type.typeName}['id']): Promise<${type.typeName}>;
 
-  ${strings.camelize(type.typeName)}GetDataById(id: ${type.typeName}['id']): Promise<${type.typeName}GetOneOutput>;
+  ${strings.camelize(type.typeName)}GetDataById(id: ${type.typeName}['id']): Promise<${type.typeName}GetOneOutput>;${fieldPagination}
 }
 `;
     // Create Service file
@@ -51,4 +49,27 @@ export interface I${type.typeName}Service {
       )}.service.interface.ts`,
       fileTemplate
     );
+}
+
+function computeFieldPagination(type: Type): string[] {
+  let fieldPagination = '';
+  let importPaginationArgs = '';
+  let importFieldPagination = '';
+  const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.isArray && field.relationType !== "selfJoinMany");
+  if(relatedFields.length > 0) {
+    relatedFields.forEach((relatedField) => {
+      fieldPagination += `
+
+  ${strings.camelize(type.typeName)}${strings.capitalize(relatedField.name)}Pagination(
+    ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'],
+    args: PaginationArgs,
+  ): Promise<${type.typeName}${strings.capitalize(relatedField.name)}Pagination>`;
+    importFieldPagination += `
+  import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } from 'application/services/dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-${relatedField.name}-pagination.dto';`;
+    });
+    importPaginationArgs = `
+import { PaginationArgs } from 'application/services/dto/pagination/pagination.dto';`;
+  }
+  
+  return [fieldPagination, importPaginationArgs, importFieldPagination];
 }
