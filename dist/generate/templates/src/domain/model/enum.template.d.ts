@@ -1,0 +1,3 @@
+/**
+ * ENUM FIELD GENERATION
+ */

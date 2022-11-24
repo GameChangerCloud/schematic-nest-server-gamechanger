@@ -3,7 +3,8 @@
   "schematics": {
     "generate": {
       "description": "Main schematic for all the server generation",
-      "factory": "./generate/index#generate"
+      "factory": "./generate/index#generate",
+      "schema": "./generate/schema.json"
     }
   }
 }

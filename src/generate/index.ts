@@ -1,11 +1,13 @@
 import { strings } from '@angular-devkit/core';
-import { apply, chain, mergeWith, move, Rule, SchematicContext, template, Tree, url } from '@angular-devkit/schematics';
+import { apply, chain, mergeWith, move, Rule, SchematicContext, 
+  // SchematicsException, 
+  template, Tree, url } from '@angular-devkit/schematics';
 import {
   schemaParser,
   getRelations,
   typesGenerator,
 } from 'easygraphql-parser-gamechanger';
-import { createResolverQuery } from './templates/query.resolver';
+
 import { createCreateDto } from './templates/src/application/services/dto/create.dto';
 import { createDeleteDto } from './templates/src/application/services/dto/delete.dto';
 import { createEntityPaginationDto } from './templates/src/application/services/dto/entity.pagination.dto';
@@ -13,8 +15,18 @@ import { createFieldPaginationDto } from './templates/src/application/services/d
 import { createGetOneDto } from './templates/src/application/services/dto/getOne.dto';
 import { createUpdateDto } from './templates/src/application/services/dto/update.dto';
 import { createService } from './templates/src/application/services/service';
-import { createServiceInterface } from './templates/src/domain/service.interface';
 import { createModule } from './templates/src/infrastructure/module';
+//import { paginationDto } from './templates/src/application/services/dto/pagination.dto';
+import { createServiceInterface } from './templates/src/domain/service.interface';
+import { createTypeOrmEntitieFile } from './templates/src/adapters/typeorm/entities/entities.model';
+import { createTypeOrmEnumFile } from './templates/src/adapters/typeorm/entities/enum.model';
+import { createDomainModelInterfaceFile } from './templates/src/domain/model/entities.template';
+import { createDomainModelEnumFile } from './templates/src/domain/model/enum.template';
+import { createResolverMutation } from './templates/src/infrastucture/resolvers/entitie.mutations.resolver'
+import { createResolverQuery } from './templates/src/infrastucture/resolvers/entitie.queries.resolver';
+import { createResolverFields } from './templates/src/infrastucture/resolvers/entitie.fields.resolver';
+// import {createEntitieQueriesResolverFile} from './templates/src/infrastucture/resolvers/entitie.queries.resolver'
+// import {createEntitieFieldsResolverFile} from './templates/src/infrastucture/resolvers/entitie.fields.resolver'
 const fs = require('fs');
 const path = require('path');
 
@@ -30,9 +42,13 @@ export function generate(_options: any): Rule {
      * CHECK REQUIRED OPTIONS
      */
 
-    // TODO : SET SCHEMA.JSON TO GET REQUIRED INFOS FOR THE GENERATION
-    // TODO : IMPLEMENT REQUIRED INFO CHECKING(Function ? checking directly there ?) 
+    // if (!_options.name) {
+    //   throw new SchematicsException('Option (name) is required.');
+    // }
 
+    // if(!_options.gqlFilePath){
+    //   throw new SchematicsException('GCL schema File path is required.');
+    // }
 
     /**
      * INIT GAMECHANGER TYPES
@@ -40,8 +56,7 @@ export function generate(_options: any): Rule {
 
     let types = initTypes(_options.gqlFileName);
 
-    console.log('Types generated :',types);
-    
+
     /**
      * NEST SERVER GENERATION
      */
@@ -65,6 +80,17 @@ export function generate(_options: any): Rule {
           });
         }
         createService(type, _tree, _options.name);
+        createTypeOrmEntitieFile(type,types, _tree, _options.name);
+        createDomainModelInterfaceFile(type, _tree, _options.name);
+        createResolverMutation(type, _tree, _options.name);
+        createResolverFields(type, _tree, _options.name);
+        createResolverQuery(type, _tree, _options.name);
+        
+        //paginationDto(_tree, _options.name);
+      } else {
+        createTypeOrmEnumFile(type, _tree, _options.name);
+        createDomainModelEnumFile(type, _tree, _options.name);
+
       }
       
       //rules.push(createService(type, strings, _options, types));
@@ -83,8 +109,6 @@ export function generate(_options: any): Rule {
 
     console.log('App generated');
 
-    // console.log('+++++/' + rules);
-    // console.log('+++++-' + chain(rules));
     return chain([mergeWith(templateSource)]);
   };
 }
