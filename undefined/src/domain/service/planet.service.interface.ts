@@ -1,5 +1,6 @@
-
 import { Planet } from 'adapters/typeorm/entities/planet.model';
+import { PaginationArgs } from 'application/services/dto/pagination/pagination.dto';
+  import { PlanetAstronautsPagination } from 'application/services/dto/planet/planet-astronauts-pagination.dto';
 import {
   PlanetCreateInput,
   PlanetCreateOutput,
@@ -25,11 +26,14 @@ export interface IPlanetService {
 
   planetDelete(planetId: Planet['id']): Promise<PlanetDeleteOutput>;
 
-  planetssPagination(
-    args: PlanetsPaginationArgs,
-  ): Promise<PlanetsPagination>;
+  planetsPagination(args: PlanetsPaginationArgs): Promise<PlanetsPagination>;
 
   planetGetById(id: Planet['id']): Promise<Planet>;
 
   planetGetDataById(id: Planet['id']): Promise<PlanetGetOneOutput>;
+
+  planetAstronautsPagination(
+    planetId: Planet['id'],
+    args: PaginationArgs,
+  ): Promise<PlanetAstronautsPagination>
 }

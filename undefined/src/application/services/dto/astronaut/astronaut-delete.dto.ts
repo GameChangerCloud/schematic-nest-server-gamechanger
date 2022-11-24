@@ -4,7 +4,6 @@ import { Astronaut } from 'adapters/typeorm/entities/astronaut.model';
 @ObjectType()
 export class AstronautDeleteOutput {
   @Field(() => ID)
-  astronaut: Astronaut['id'];
+  astronautId: Astronaut['id'];
 }
-
     

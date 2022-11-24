@@ -16,6 +16,7 @@
   "dependencies": {
     "@angular-devkit/core": "^13.3.5",
     "@angular-devkit/schematics": "^13.3.5",
+    "@angular-devkit/schematics-cli": "^15.0.0",
     "easygraphql-parser-gamechanger": "^1.0.5",
     "pluralize": "^8.0.0",
     "typescript": "~4.6.2"

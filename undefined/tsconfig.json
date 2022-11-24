@@ -4,6 +4,7 @@
     "lib": ["es5", "es6"],
     "target": "es6",
     "module": "commonjs",
+    "skipLibCheck": true,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

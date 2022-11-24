@@ -1,4 +1,3 @@
-
 import { Astronaut } from 'adapters/typeorm/entities/astronaut.model';
 import {
   AstronautCreateInput,
@@ -25,9 +24,7 @@ export interface IAstronautService {
 
   astronautDelete(astronautId: Astronaut['id']): Promise<AstronautDeleteOutput>;
 
-  astronautssPagination(
-    args: AstronautsPaginationArgs,
-  ): Promise<AstronautsPagination>;
+  astronautsPagination(args: AstronautsPaginationArgs): Promise<AstronautsPagination>;
 
   astronautGetById(id: Astronaut['id']): Promise<Astronaut>;
 

@@ -1,6 +1,7 @@
 import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
+import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
 const pluralize = require("pluralize");
 
 export function createService(
@@ -115,7 +116,7 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
 
 function computeFieldTemplate(type: Type): string {
   let updateFields = '';
-  const scalarAndEnumFields = type.fields.filter((field) => field.type !== "ID" && (!field.relation || field.isEnum));
+  const scalarAndEnumFields = type.fields.filter((field: Field) => field.type !== "ID" && (!field.relation || field.isEnum));
   if (scalarAndEnumFields.length > 0) {
     scalarAndEnumFields.forEach((field) => {
         console.log(typeof field.type + "   " + field.type);

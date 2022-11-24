@@ -7,6 +7,9 @@ import { User } from 'adapters/typeorm/entities/user.model';
 
 @InputType()
 export class AstronautCreateInput {
+  @Field(() => Number)
+  immat: number
+
   @Field(() => String)
   firstname: string
 

@@ -10,7 +10,7 @@ import {
 @InputType()
 export class AstronautsPaginationSortBy extends PaginationSortBy {
     @Field(() => SortDirection, { nullable: true })
-    firstname?: SortDirection;
+    immat?: SortDirection;
 }
 
 @ArgsType()

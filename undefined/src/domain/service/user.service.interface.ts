@@ -1,4 +1,3 @@
-
 import { User } from 'adapters/typeorm/entities/user.model';
 import {
   UserCreateInput,
@@ -25,9 +24,7 @@ export interface IUserService {
 
   userDelete(userId: User['id']): Promise<UserDeleteOutput>;
 
-  userssPagination(
-    args: UsersPaginationArgs,
-  ): Promise<UsersPagination>;
+  usersPagination(args: UsersPaginationArgs): Promise<UsersPagination>;
 
   userGetById(id: User['id']): Promise<User>;
 
