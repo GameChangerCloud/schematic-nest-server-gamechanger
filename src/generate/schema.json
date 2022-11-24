@@ -1,16 +1,16 @@
 {
   "$schema": "http://json-schema.org/schema",
   "$id": "0",
-  "title": "ng new options schema",
+  "title": "Create new nest-server-gamechanger ",
   "type": "object",
-  "description": "Generates a new basic application setup with ngrx store for your graphQL schema ",
+  "description": "Generator of a serverless GraphQL/TypeORM API that can be deployed on AWS from a GraphQL schema",
   "properties": {
     "name": {
       "description": "Name of the new app.",
       "type": "string",
       "pattern": "^(?:@[a-zA-Z0-9-*~][a-zA-Z0-9-*._~]*/)?[a-zA-Z0-9-~][a-zA-Z0-9-._~]*$",
-      "default": "default-app",
-      "x-prompt": "What name would you like to use for the application?"
+      "default": "nest-server-gamechanger",
+      "x-prompt": "What name would you like to use ?"
     },
     "gqlFilePath": {
       "type": "string",
