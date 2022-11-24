@@ -2,15 +2,14 @@ import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 
-export function createResolverMutation(
+export function createMutationsResolver(
   type: Type,
   _tree: Tree,
   projectName: string
 ) {
-    let fileTemplate = `
-    import { Args, ID, Mutation, Resolver } from '@nestjs/graphql';
+    let fileTemplate = `import { Args, ID, Mutation, Resolver } from '@nestjs/graphql';
 import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';
-import {${type.typeName}Service } from 'application/services/${strings.camelize(type.typeName)}.service';
+import { ${type.typeName}Service } from 'application/services/${strings.camelize(type.typeName)}.service';
 import {
   ${type.typeName}CreateInput,
   ${type.typeName}CreateOutput,
@@ -45,8 +44,7 @@ export class ${type.typeName}MutationsResolver {
     return this.${strings.camelize(type.typeName)}sService.${strings.camelize(type.typeName)}Delete(${strings.camelize(type.typeName)}Id);
   }
 }
-
-    `;
+`;
     // Create Service file
     _tree.create(
       `${projectName}/src/infrastructure/resolvers/${strings.camelize(

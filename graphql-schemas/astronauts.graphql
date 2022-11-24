@@ -28,8 +28,7 @@ type User {
 
 type Astronaut {
   id: ID!
-  immat: Int! @length(max: 10)
-  firstname: String! @length(min: 2, max: 10)
+  firstname: String! @length(min: 3, max: 10)
   lastname: String! @length(min: 2)
   picture: String
   rank: Rank!

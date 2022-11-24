@@ -18,13 +18,16 @@ import { createService } from './templates/src/application/services/service';
 import { createModule } from './templates/src/infrastructure/module';
 //import { paginationDto } from './templates/src/application/services/dto/pagination.dto';
 import { createServiceInterface } from './templates/src/domain/service.interface';
-import { createTypeOrmEntitieFile } from './templates/src/adapters/typeorm/entities/entities.model';
+import { createTypeOrmEntityFile } from './templates/src/adapters/typeorm/entities/entities.model';
 import { createTypeOrmEnumFile } from './templates/src/adapters/typeorm/entities/enum.model';
 import { createDomainModelInterfaceFile } from './templates/src/domain/model/entities.template';
 import { createDomainModelEnumFile } from './templates/src/domain/model/enum.template';
-import { createResolverMutation } from './templates/src/infrastucture/resolvers/entitie.mutations.resolver'
-import { createResolverQuery } from './templates/src/infrastucture/resolvers/entitie.queries.resolver';
-import { createResolverFields } from './templates/src/infrastucture/resolvers/entitie.fields.resolver';
+import { createAppModule } from './templates/src/infrastructure/main.module';
+import { createMutationsResolver } from './templates/src/infrastructure/resolvers/mutations.resolver';
+import { createFieldsResolver } from './templates/src/infrastructure/resolvers/fields.resolver';
+import { createQueriesResolver } from './templates/src/infrastructure/resolvers/queries.resolver';
+import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
+import { createDatasource } from './templates/src/adapters/typeorm/datasource';
 // import {createEntitieQueriesResolverFile} from './templates/src/infrastucture/resolvers/entitie.queries.resolver'
 // import {createEntitieFieldsResolverFile} from './templates/src/infrastucture/resolvers/entitie.fields.resolver'
 const fs = require('fs');
@@ -66,25 +69,25 @@ export function generate(_options: any): Rule {
     types.forEach((type) => {
       if (type.type !== 'EnumTypeDefinition') {
         createModule(type, _tree, _options.name);
-        createResolverQuery(type, _tree, _options.name);
         createServiceInterface(type, _tree, _options.name);
         createCreateDto(type, _tree, _options.name);
         createDeleteDto(type, _tree, _options.name);
         createGetOneDto(type, _tree, _options.name);
         createUpdateDto(type, _tree, _options.name);
         createEntityPaginationDto(type, _tree, _options.name);
-        const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.isArray && field.relationType)
-        if (relatedFields.length > 0) {
-          relatedFields.forEach((relatedField) => {
+        const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.relationType);
+        if (relatedFields.length > 0) createFieldsResolver(type, relatedFields, _tree, _options.name);
+        const relatedFieldsArray = relatedFields.filter((field) => field.isArray);
+        if (relatedFieldsArray.length > 0) {
+          relatedFieldsArray.forEach((relatedField: Field) => {
             createFieldPaginationDto(type, relatedField, _tree, _options.name);
           });
         }
         createService(type, _tree, _options.name);
-        createTypeOrmEntitieFile(type,types, _tree, _options.name);
+        createTypeOrmEntityFile(type,types, _tree, _options.name);
         createDomainModelInterfaceFile(type, _tree, _options.name);
-        createResolverMutation(type, _tree, _options.name);
-        createResolverFields(type, _tree, _options.name);
-        createResolverQuery(type, _tree, _options.name);
+        createMutationsResolver(type, _tree, _options.name);
+        createQueriesResolver(type, _tree, _options.name);
         
         //paginationDto(_tree, _options.name);
       } else {
@@ -97,6 +100,9 @@ export function generate(_options: any): Rule {
       
     // rules.push(createModule(type, strings, _options, types));
     })
+
+    createAppModule(types, _tree, _options.name);
+    createDatasource(types, _tree, _options.name);
 
     const templateSource = apply(url('./app'), [
       template({

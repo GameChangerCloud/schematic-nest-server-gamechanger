@@ -14,8 +14,7 @@ export function createDomainModelInterfaceFile(
 `import { INode } from './node.interface';
 ${generateEntitieRelationsModelImportsTemplate(type)}
 export interface I${typeName} extends INode {
-  ${generateEntitieFieldsTemplate(type)}
-}
+${generateEntitieFieldsTemplate(type)}}
 `;
 
   // Create Service file
@@ -54,11 +53,12 @@ function generateEntitieFieldsTemplate(type: Type): string {
       const plurals = field.isArray ? "s":''
       let interfacedField = ''
       if(field.type !== 'String' && field.type !== 'Number' && field.type !== 'Boolean' && !field.isEnum && field.type !== 'ID' ) {
-         interfacedField = 'I'
-         template += `${field.type}Id${plurals}:string${arrayCharacter};\n`
+        interfacedField = 'I';
+        template += `  ${strings.camelize(field.type)}Id${plurals}?: string${arrayCharacter};\n`;
       }
       if(field.type !== 'ID'){
-        template += `${strings.camelize(field.name)}${nullField}:${interfacedField}${field.type}${arrayCharacter};\n`
+        if (!field.relation) template += `  ${strings.camelize(field.name)}${nullField}: ${interfacedField}${strings.camelize(field.type)}${arrayCharacter};\n`;
+        else template += `  ${strings.camelize(field.name)}${nullField}: ${interfacedField}${field.type}${arrayCharacter};\n`;
       }
     })    
   return template

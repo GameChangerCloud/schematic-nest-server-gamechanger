@@ -13,7 +13,7 @@ ${entitieEnumListTemplate}
 
 registerEnumType(${typeName}, {
   name: '${typeName}',
-});`
+});\n`
   
   // Create Service file
   _tree.create(
@@ -26,13 +26,10 @@ function generateEntitieEnumListTemplate(type:Type): string{
   let typeName = type.typeName
   let enumListTemplate = ``
   type.values.forEach((value:string)=>{
-    enumListTemplate += `${value}='${value.toLocaleLowerCase()}',\n` + '    '
+    enumListTemplate += `  ${value} = '${value.toLocaleLowerCase()}',\n`
   })
     let entitieEnumListTemplate = 
-  `export enum ${typeName} {
-    ${enumListTemplate}
-  }`
+`export enum ${typeName} {
+${enumListTemplate}}`
   return entitieEnumListTemplate
 }
-
-
