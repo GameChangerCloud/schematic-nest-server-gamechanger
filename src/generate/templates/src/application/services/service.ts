@@ -5,11 +5,12 @@ import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
 const pluralize = require("pluralize");
 
 export function createService(
-    type: Type,
-    _tree: Tree,
-    projectName: string
+  types: Type[],
+  type: Type,
+  _tree: Tree,
+  projectName: string
 ) {
-    let [paginationArgsImport, fieldPaginationImport, fieldPaginationMethod] = computePaginationTemplates(type);
+    let [paginationArgsImport, fieldPaginationImport, fieldPaginationMethod] = computePaginationTemplates(types, type);
     let [
       forwardRefAndInjectImport,
       forwardReferencedServices,
@@ -35,20 +36,20 @@ import {
   ${type.typeName}sPaginationArgs,
 } from './dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-pagination.dto';
 import { ${type.typeName}UpdateInput, ${type.typeName}UpdateOutput } from './dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-update.dto';
-    
+
 @Injectable()
 export class ${type.typeName}Service implements I${type.typeName}Service {
   constructor(
     @InjectRepository(${type.typeName})
     private readonly ${strings.camelize(type.typeName)}Repository: Repository<${type.typeName}>,${relatedRepositoryImport}${forwardReferencedServices}${referencedServices}
   ) {}
-    
+
   async ${strings.camelize(type.typeName)}Create(input: ${type.typeName}CreateInput): Promise<${type.typeName}CreateOutput> {
     const ${strings.camelize(type.typeName)} = this.${strings.camelize(type.typeName)}Repository.create(input);${createRelationships}${initRelationships}
     await ${strings.camelize(type.typeName)}.save();
     return { ${strings.camelize(type.typeName)} };
   }
-    
+
   async ${strings.camelize(type.typeName)}Update(
     ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'],
     input: ${type.typeName}UpdateInput,
@@ -59,7 +60,7 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
     await ${strings.camelize(type.typeName)}.save();
     return { ${strings.camelize(type.typeName)} };
   }
-    
+
   async ${strings.camelize(type.typeName)}Delete(${strings.camelize(type.typeName)}Id: ${type.typeName}['id']): Promise<${type.typeName}DeleteOutput> {
     const ${strings.camelize(type.typeName)} = await this.${strings.camelize(type.typeName)}Repository.findOneOrFail({
       where: { id: ${strings.camelize(type.typeName)}Id },
@@ -67,7 +68,7 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
     await ${strings.camelize(type.typeName)}.remove();
     return { ${strings.camelize(type.typeName)}Id };
   }
-    
+
   async ${strings.camelize(pluralize(type.typeName))}Pagination(args: ${pluralize(type.typeName)}PaginationArgs): Promise<${pluralize(type.typeName)}Pagination> {
     const queryBuilder = this.${strings.camelize(type.typeName)}Repository.createQueryBuilder('${strings.camelize(type.typeName)}');
     queryBuilder.take(args.take);
@@ -89,7 +90,7 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
     const [nodes, totalCount] = await queryBuilder.getManyAndCount();
     return { nodes, totalCount };
   }
-    
+
   async ${strings.camelize(type.typeName)}GetDataById(${strings.camelize(type.typeName)}Id: ${type.typeName}['id']): Promise<${type.typeName}GetOneOutput> {
     const ${strings.camelize(type.typeName)} = await this.${strings.camelize(type.typeName)}Repository.findOneOrFail({
       where: { id: ${strings.camelize(type.typeName)}Id },
@@ -119,9 +120,8 @@ function computeFieldTemplate(type: Type): string {
   const scalarAndEnumFields = type.fields.filter((field: Field) => field.type !== "ID" && (!field.relation || field.isEnum));
   if (scalarAndEnumFields.length > 0) {
     scalarAndEnumFields.forEach((field) => {
-        console.log(typeof field.type + "   " + field.type);
         updateFields += `
-    ${strings.camelize(type.typeName)}.${strings.camelize(field.name)} = input.${strings.camelize(field.name)};`;
+    ${strings.camelize(type.typeName)}.${field.name} = input.${strings.camelize(field.name)};`;
       });
   }
   return updateFields;
@@ -145,7 +145,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
       if (relationship.isArray) {
         createRelationships += `
     const mock${relationship.type} = new ${relationship.type}();
-    planet.${strings.camelize(relationship.name)} = [mock${relationship.type}];
+    ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)} = [mock${relationship.type}];
     if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
       for (let i = 0; i < input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length; i++) {
         const ${strings.camelize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(
@@ -162,7 +162,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
           await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(${strings.camelize(pluralize(relationship.name, 1))}Id),
         );
       });
-      planet.${strings.camelize(relationship.name)} = linked${strings.capitalize(relationship.name)};
+      ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)} = linked${strings.capitalize(relationship.name)};
     }`;
       if (relationship.relationType !== "selfJoinMany") {
         relatedRepositoryImport += `
@@ -174,13 +174,13 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
     ${strings.camelize(type.typeName)}.${relationship.name} = new ${relationship.type}();`;
         initRelationships += `
     if (input.${relationship.name}Id) {
-      const ${relationship.name} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(input.${strings.camelize(relationship.type)}Id);
+      const ${relationship.name} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(input.${relationship.name}Id);
       ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
     }`;
         updateRelationships += `
     if (input.${relationship.name}Id) {
       ${strings.camelize(type.typeName)}.${relationship.name} = new ${relationship.type}();
-      const ${relationship.name} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(input.${strings.camelize(relationship.type)}Id);
+      const ${relationship.name} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(input.${relationship.name}Id);
       ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
     }`;
       }
@@ -220,7 +220,7 @@ function computeForwardRelationships(type: Type): string[] {
     return [forwardRelationshipImport, forwardReferencedServices, referencedServices];
 }
 
-function computePaginationTemplates(type: Type): string[] {
+function computePaginationTemplates(types: Type[], type: Type): string[] {
   let paginationArgsImport = "";
   let fieldPaginationImport = "";
   let fieldPaginationMethod = "";
@@ -228,9 +228,13 @@ function computePaginationTemplates(type: Type): string[] {
   if (relatedFields.length > 0) {
     paginationArgsImport = 'PaginationArgs, ';
     relatedFields.forEach((relatedField) => {
-      fieldPaginationImport += `
-import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } from './dto/planet/${strings.camelize(type.typeName)}-${strings.camelize(relatedField.name)}-pagination.dto';`;
-      fieldPaginationMethod += `
+      const relatedType = types.find((type) => type.typeName === relatedField.type);
+      if (relatedType){
+        const fieldInRelatedType = relatedType.fields.find((field) => field.type === type.typeName);
+        if (fieldInRelatedType) {
+          fieldPaginationImport += `
+import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } from './dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-${strings.camelize(relatedField.name)}-pagination.dto';`;
+                fieldPaginationMethod += `
   async ${strings.camelize(type.typeName)}${strings.capitalize(relatedField.name)}Pagination(
     ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'],
     args: PaginationArgs,
@@ -239,21 +243,23 @@ import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } fr
       skip: args.skip,
       take: args.take,
       where: {
-        ${strings.camelize(type.typeName)}: {
+        ${fieldInRelatedType.name}: {
           id: ${strings.camelize(type.typeName)}Id,
         },
       },
       order: {
         createdAt:
           args.sortBy?.createdAt === SortDirection.ASC ? 'ASC' : 'DESC',
-        },
+      },
     });
-
+          
     return {
       nodes,
       totalCount,
     };
-  }`
+  }\n`;
+        }
+      }
     }); 
   }
   return [paginationArgsImport, fieldPaginationImport, fieldPaginationMethod];

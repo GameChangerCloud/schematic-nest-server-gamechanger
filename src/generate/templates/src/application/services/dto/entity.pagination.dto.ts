@@ -33,8 +33,7 @@ export class ${pluralize(type.typeName)}PaginationArgs extends PaginationArgs {
 export class ${pluralize(type.typeName)}Pagination extends Pagination {
     @Field(() => [${type.typeName}])
     nodes: ${type.typeName}[];
-}
-    `;
+}\n`;
 
     // Create Service file
     _tree.create(

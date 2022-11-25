@@ -12,13 +12,13 @@
       "default": "nest-server-gamechanger",
       "x-prompt": "What name would you like to use ?"
     },
-    "gqlFilePath": {
+    "graphqlFile": {
       "type": "string",
       "description": "Path of the graphQl schema",
       "minLength": 1,
-      "default":"./graphql-schemas/astronauts.graphql",
-      "x-prompt": "Please fill the name of your graphQL schema (put schema file in : /graphql-schemas/<your-schema-name>.graphql)"
+      "default": "astronauts.graphql",
+      "x-prompt": "Please fill the name of your graphQL schema (put schema file in : <your-schema-name>.graphql)"
     }
   },
-  "required": ["name","gqlFilePath"]
+  "required": ["name", "graphqlFile"]
  }

@@ -84,7 +84,7 @@ function generateResolveFields(type: Type, relatedFields: Field[]): string {
       return null;
     }
     try {
-      return await this.${field.name}Service.${field.name}GetById(${strings.camelize(type.typeName)}.${field.name}Id);
+      return await this.${strings.camelize(field.type)}Service.${strings.camelize(field.type)}GetById(${strings.camelize(type.typeName)}.${field.name}Id);
     } catch (err) {
       return null;
     }

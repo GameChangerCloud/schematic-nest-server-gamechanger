@@ -10,7 +10,7 @@ export function createAppModule(
     let entitiesModules = '';
     let entitiesModulesImport = '';
     types
-      .filter((type) => type.type === 'ObjectTypeDefinition')
+      .filter((type) => type.type === 'ObjectTypeDefinition' && type.isNotOperation())
       .forEach((type) => {
         entitiesModules += `
     ${type.typeName}Module,`;

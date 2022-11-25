@@ -1,6 +1,4 @@
-# Getting Started With Schematics
-
-This repository is a basic Schematic implementation that serves as a starting point to create and publish Schematics to NPM.
+This schematic allows you to generate graphql API based on NestJS and TypeORM
 
 ### Testing
 
@@ -26,3 +24,14 @@ npm publish
 ```
 
 That's it!
+
+### Running
+
+To run generator, add your graphql schema in the graphql-schemas folder and run:
+```bash
+schematics ./:generate --dry-run=false
+```
+
+You will then need to enter the name of the project you want to generate and the name and extension of the schema file as so :
+`nest-graphql-server`
+`employees.graphql`

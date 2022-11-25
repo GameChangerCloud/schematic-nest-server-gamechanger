@@ -57,7 +57,7 @@ export function generate(_options: any): Rule {
      * INIT GAMECHANGER TYPES
      */
 
-    let types = initTypes(_options.gqlFileName);
+    let types = initTypes(_options.graphqlFile);
 
 
     /**
@@ -67,7 +67,7 @@ export function generate(_options: any): Rule {
     //const rules: Rule[] = [];
 
     types.forEach((type) => {
-      if (type.type !== 'EnumTypeDefinition') {
+      if (type.type === 'ObjectTypeDefinition' && type.isNotOperation()) {
         createModule(type, _tree, _options.name);
         createServiceInterface(type, _tree, _options.name);
         createCreateDto(type, _tree, _options.name);
@@ -83,22 +83,16 @@ export function generate(_options: any): Rule {
             createFieldPaginationDto(type, relatedField, _tree, _options.name);
           });
         }
-        createService(type, _tree, _options.name);
+        createService(types, type, _tree, _options.name);
         createTypeOrmEntityFile(type,types, _tree, _options.name);
         createDomainModelInterfaceFile(type, _tree, _options.name);
         createMutationsResolver(type, _tree, _options.name);
         createQueriesResolver(type, _tree, _options.name);
-        
-        //paginationDto(_tree, _options.name);
-      } else {
+      } else if (type.type === 'EnumTypeDefinition') {
         createTypeOrmEnumFile(type, _tree, _options.name);
         createDomainModelEnumFile(type, _tree, _options.name);
 
       }
-      
-      //rules.push(createService(type, strings, _options, types));
-      
-    // rules.push(createModule(type, strings, _options, types));
     })
 
     createAppModule(types, _tree, _options.name);
@@ -128,22 +122,13 @@ export function generate(_options: any): Rule {
  * TODO : Return schema error | Return error if file not found
  * @returns types
  */
- function initTypes(gcpFileName: string) {
-  gcpFileName;
-
+ function initTypes(graphqlSchema: string) {
   const schemaCode = fs.readFileSync(
-    path.join(__dirname, '../../graphql-schemas', `astronauts.graphql`),
+    path.join(__dirname, '../../graphql-schemas/', graphqlSchema),
     'utf8'
   );
 
-  // 1 - Basic Parsing of the schema
-  // let types = schemaParser(schemaCode)
-  // 2 - Enriched parsing
-  let types = typesGenerator(schemaParser(schemaCode));
-  // 3 - Add relation & directivity info in the types
-  types = getRelations(types);
-  
-  return types;
+  return getRelations(typesGenerator(schemaParser(schemaCode)));
 }
 
 

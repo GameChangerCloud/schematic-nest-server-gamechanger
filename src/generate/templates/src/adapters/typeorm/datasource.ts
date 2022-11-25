@@ -38,7 +38,7 @@ export const AppDataSource = new DataSource({
 function computeEntitiesListAndImports(types: Type[]) {
   let entitiesImports = '';
   let entitiesList = '';
-  let objectTypes = types.filter((type) => type.type === "ObjectTypeDefinition");
+  let objectTypes = types.filter((type) => type.type === "ObjectTypeDefinition" && type.isNotOperation());
   for (let i = 0; i < objectTypes.length; i++) {
     entitiesImports += `\nimport { ${objectTypes[i].typeName} } from './entities/${strings.camelize(objectTypes[i].typeName)}.model';`;
     if (i === objectTypes.length - 1) entitiesList += `${objectTypes[i].typeName}`;

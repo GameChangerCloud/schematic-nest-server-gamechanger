@@ -17,8 +17,7 @@ import { Pagination } from '../pagination/pagination.dto';
 export class ${type.typeName}${strings.capitalize(relatedField.name)}Pagination extends Pagination {
   @Field(() => [${relatedField.type}])
   nodes: ${relatedField.type}[];
-}
-`;
+}\n`;
 
     // Create Service file
     _tree.create(

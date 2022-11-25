@@ -11,9 +11,7 @@ export function createGetOneDto(
 import { ${type.typeName}CreateOutput } from './${strings.camelize(type.typeName)}-create.dto';
 
 @ObjectType()
-export class ${type.typeName}GetOneOutput extends ${type.typeName}CreateOutput {}
-    
-    `;
+export class ${type.typeName}GetOneOutput extends ${type.typeName}CreateOutput {}\n`;
 
     // Create Service file
     _tree.create(

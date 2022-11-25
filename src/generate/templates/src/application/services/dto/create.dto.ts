@@ -23,10 +23,10 @@ ${stdScalarsTemplate}${stdRelationshipsTemplate}}
 
 @ObjectType()
 export class ${type.typeName}CreateOutput {
-@Field(() => ${type.typeName})
-${strings.camelize(type.typeName)}: ${type.typeName};
+  @Field(() => ${type.typeName})
+  ${strings.camelize(type.typeName)}: ${type.typeName};
 }
-    `;
+`;
 
     // Create Service file
     _tree.create(
@@ -89,9 +89,7 @@ function computeScalarsTemplate(type: Type): string[] {
     }
 
     const scalarTemplate = `  ${fieldDirective}@Field(() => ${scalarTypeGQL}${noNullOption})
-  ${scalar.name}${noNullCharacter}: ${strings.camelize(scalarTypeGQL)}${arrayCharacter};
-
-`;
+  ${scalar.name}${noNullCharacter}: ${strings.camelize(scalarTypeGQL)}${arrayCharacter};\n\n`;
     stdScalarsTemplate += scalarTemplate;
   });
 
@@ -102,8 +100,7 @@ function computeScalarsTemplate(type: Type): string[] {
       else validatorsToImportString += `${validatorsToImportList[i]}, `;
     }
   }
-  const validatorsImportTemplate = `
-import { ${validatorsToImportString} } from 'class-validator';`;
+  const validatorsImportTemplate = `\nimport { ${validatorsToImportString} } from 'class-validator';`;
 
   return [stdScalarsTemplate, validatorsImportTemplate];
 }
@@ -116,14 +113,10 @@ function computeRelationshipsTemplate(type: Type): string {
     let enumsTemplate;
     if (enumField.isArray) {
       enumsTemplate = `  @Field(() => [${enumField.type}])
-  ${enumField.name}: ${enumField.type}[];
-        
-`;
+  ${enumField.name}: ${enumField.type}[];\n\n`;
     } else {
       enumsTemplate = `  @Field(() => ${enumField.type})
-  ${enumField.name}: ${enumField.type};
-          
-`;
+  ${enumField.name}: ${enumField.type};\n\n`;
     }
     relationshipsAndEnumsTemplate += enumsTemplate;
   });
@@ -132,14 +125,10 @@ function computeRelationshipsTemplate(type: Type): string {
     let relationshipsTemplate;
     if (relationship.isArray) {
       relationshipsTemplate = `  @Field(() => [String], { nullable: true })
-  ${strings.camelize(pluralize(relationship.name, 1))}Ids?: ${relationship.type}['id'][] | null;
-        
-`;
+  ${strings.camelize(pluralize(relationship.name, 1))}Ids?: ${relationship.type}['id'][] | null;\n\n`;
   } else {
     relationshipsTemplate = `  @Field(() => String, { nullable: true })
-  ${strings.camelize(relationship.name)}Id?: ${relationship.type}['id'] | null;
-        
-`;
+  ${strings.camelize(relationship.name)}Id?: ${relationship.type}['id'] | null;\n\n`;
   }
   relationshipsAndEnumsTemplate += relationshipsTemplate;
   });
@@ -155,16 +144,13 @@ function computeFieldDirective(scalar: Field, scalarType: string, validatorsToIm
       let minLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === "min");
       let maxLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === "max");
       if (minLength && maxLength) {
-        directiveTemplate = `@Length(${minLength.value}, ${maxLength.value})
-  `;
+        directiveTemplate = `@Length(${minLength.value}, ${maxLength.value})\n  `;
         if (!validatorsToImport.includes('Length')) validatorsToImport.push('Length');
       } else if (minLength && !maxLength) {
-        directiveTemplate = `@MinLength(${minLength.value})
-  `;
+        directiveTemplate = `@MinLength(${minLength.value})\n  `;
         if (!validatorsToImport.includes('MinLength')) validatorsToImport.push('MinLength');
       } else if (!minLength && maxLength) {
-        directiveTemplate = `@MaxLength(${maxLength.value})
-  `;
+        directiveTemplate = `@MaxLength(${maxLength.value})\n  `;
         if (!validatorsToImport.includes('MaxLength')) validatorsToImport.push('MaxLength');
       }
     }
@@ -176,13 +162,11 @@ function computeFieldDirective(scalar: Field, scalarType: string, validatorsToIm
       let minValue = rangeDirective.args.find((arg: { name: string, value: string }) => arg.name === "min");
       let maxValue = rangeDirective.args.find((arg: { name: string, value: string }) => arg.name === "max");
       if (minValue) {
-        directiveTemplate += `@Min(${minValue.value})
-  `;
+        directiveTemplate += `@Min(${minValue.value})\n  `;
         if (!validatorsToImport.includes('Min')) validatorsToImport.push('Min');
       } 
       if (maxValue) {
-        directiveTemplate += `@Max(${maxValue.value})
-  `;
+        directiveTemplate += `@Max(${maxValue.value})\n  `;
         if (!validatorsToImport.includes('Max')) validatorsToImport.push('Max');
       }
     }

@@ -14,8 +14,7 @@ import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(t
 export class ${type.typeName}DeleteOutput {
   @Field(() => ID)
   ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'];
-}
-    `;
+}\n`;
 
     // Create Service file
     _tree.create(

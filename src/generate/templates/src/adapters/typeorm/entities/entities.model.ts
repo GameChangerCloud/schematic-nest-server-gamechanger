@@ -11,7 +11,7 @@ export function createTypeOrmEntityFile(
 ) {
   let typeName = type.typeName;
 
-  let entityFiletemplate = `import { 
+  let entityFiletemplate = `import {
   Entity, 
   Column,
   JoinColumn,
@@ -47,7 +47,7 @@ function generateTypeOrmRelationsImportTemplate(type: Type): string {
     oneOnly: 'OneToOne',
     oneToMany: 'ManyToOne',
     manyToOne: 'OneToMany',
-    manyOnly: 'ManyToMany',
+    manyOnly: 'OneToMany',
   };
   let typeOrmRelationsImportTemplate = `RelationId,\n`;
 
@@ -111,7 +111,7 @@ function generateEntityFieldsTemplate(type: Type): string {
     const arrayCharacter = field.isArray ? "[]" : "";
     const nullOption = field.noNull ? "" : ", { nullable: true }";
     const uniqueOption = field.noNull ? "" : "\n    unique: true,\n";
-    const nullColumn = field.noNull ? "" : "    nullable: true,\n";
+    const nullColumn = field.noNull ? "" : "\n    nullable: true,\n";
     const nullField = field.noNull ? "" : "?";
     const nullType = field.noNull ? "" : " | null";
     const enumOptions = field.isEnum ? `\n    type: 'enum',\n    enum: ${field.type},\n  `:``
@@ -135,12 +135,12 @@ function generateEntityFieldsTemplate(type: Type): string {
     fieldTemplate += `\n  @${getTypeOrmRelation(field.relationType)}(() => ${strings.capitalize(field.type)}${singleRelation} ${relationDeleteOption})
   @JoinColumn()
   ${field.name}: ${field.type}${arrayCharacter};\n
-  @RelationId((self: ${type.typeName}) => self.${strings.decamelize(field.type)}${pluralFieldName})
-  readonly ${strings.camelize(field.type)}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n` 
+  @RelationId((self: ${type.typeName}) => self.${field.name})
+  readonly ${strings.camelize(field.name)}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n` 
     : 
     fieldTemplate += `\n  @Field(() => ${arrayBracketStart}${field.type}${nullOption}${arrayBracketEnd})
-  @Column({${nullColumn + enumOptions + uniqueOption}})
-  ${strings.decamelize(field.name)}${nullField}: ${JSFieldType}${arrayCharacter};\n`
+  @Column({${nullColumn + enumOptions + uniqueOption}  })
+  ${field.name}${nullField}: ${JSFieldType}${arrayCharacter};\n`
 
     entityFieldstemplate += fieldTemplate
 
