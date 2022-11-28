@@ -46,7 +46,7 @@ export class ${type.typeName}Module {}
 }
 
 function computeRelationalTemplates(type: Type): string[] {
-    const relationalFields = type.fields.filter((field) => field.relation && field.relationType !== "selfJoinOne" && field.relationType !== "selfJoinMany" && !field.isEnum && !field.isDeprecated);
+    const relationalFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated);
     let [forwardRefImport, forwardReferencedModules, referencedModules] = computeForwardReferences(type, relationalFields);
     let entitiesImport = "";
     let fieldResolverImport = "";
@@ -58,14 +58,16 @@ function computeRelationalTemplates(type: Type): string[] {
 import { ${type.typeName}FieldsResolver } from 'infrastructure/resolvers/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}.fields.resolver';`;
         fieldsResolver = `
     ${type.typeName}FieldsResolver,`;
-        relationalFields.forEach((relationalField) => {
+        relationalFields
+          .filter((field) => field.type !== type.typeName)
+          .forEach((relationalField) => {
             // Si ref dans les types associés, initialiser forwardRefImport forwardRefModu & refMod
             entitiesImport += `
 import { ${relationalField.type} } from 'adapters/typeorm/entities/${strings.camelize(relationalField.type)}.model';`;
             entitiesModulesImport +=`
 import { ${relationalField.type}Module } from './${strings.camelize(relationalField.type)}.module';`;
             typeOmrRelatedEntities +=`, ${relationalField.type}`;
-        });
+          });
     }
     return [forwardRefImport, 
         entitiesImport, 

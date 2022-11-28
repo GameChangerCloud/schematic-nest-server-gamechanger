@@ -45,15 +45,20 @@ export class ${typeName} extends Node implements ${typeName}Model {${generateEnt
 function generateTypeOrmRelationsImportTemplate(type: Type): string {
   let typeRelationsToTypeOrmImport = {
     oneOnly: 'OneToOne',
+    oneToOne: 'OneToOne',
+    selfJoinOne: 'OneToOne',
     oneToMany: 'ManyToOne',
     manyToOne: 'OneToMany',
     manyOnly: 'OneToMany',
+    selfJoinMany: 'ManyToMany',
+    manyToMany: 'ManyToMany',
+
   };
   let typeOrmRelationsImportTemplate = `RelationId,\n`;
 
   type.relationList.forEach(
     (result: {
-      relation: 'oneOnly' | 'oneToMany' | 'manyToOne' | 'manyOnly';
+      relation: 'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany';
       type: string;
     }) => {
       let relation = typeRelationsToTypeOrmImport[result.relation];
@@ -78,21 +83,18 @@ function generateEntityRelationsModelImportsTemplate(
   let entityRelationsModelImportsTemplate = ``;
 
   type.relationList.forEach(
-    (result: {
-      relation: 'oneOnly' | 'oneToMany' | 'manyToOne';
+    (relation: {
+      relation: 'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany' ;
       type: string;
     }) => {
-      let importType = '';
-      let relatedType = types.find(type => type.typeName === result.type);
-      // type.fields.forEach((type) => {
-      //   type.isEnum //&& type.name === strings.decamelize(result.type)  
-      //     ? importType = 'enum'
-      //     : importType = 'model';
-      // }); 
-      importType = relatedType?.type === "EnumTypeDefinition" ? 'enum' : 'model';
-      entityRelationsModelImportsTemplate += `import { ${
-        result.type
-      } } from './${strings.decamelize(result.type)}.${importType}';\n`;
+      if (relation.type !== type.typeName) {
+        let relatedType = types.find(type => type.typeName === relation.type);
+        let importType = relatedType?.type === "EnumTypeDefinition" ? 'enum' : 'model';
+        entityRelationsModelImportsTemplate += `import { ${
+          relation.type
+        } } from './${strings.decamelize(relation.type)}.${importType}';\n`;
+      }
+      
     }
   );
 
@@ -151,11 +153,16 @@ function generateEntityFieldsTemplate(type: Type): string {
   return entityFieldstemplate;
 }
 
-function getTypeOrmRelation(relation:'oneOnly' | 'oneToMany' | 'manyToOne'){
+function getTypeOrmRelation(relation:'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany'){
   let typeRelationsToTypeOrmImport = {
     oneOnly: 'OneToOne',
+    oneToOne: 'OneToOne',
+    selfJoinOne: 'OneToOne',
     oneToMany: 'ManyToOne',
     manyToOne: 'OneToMany',
+    manyOnly: 'OneToMany',
+    selfJoinMany: 'ManyToMany',
+    manyToMany: 'ManyToMany',
   };
 
   return typeRelationsToTypeOrmImport[relation]

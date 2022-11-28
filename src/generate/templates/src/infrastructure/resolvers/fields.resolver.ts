@@ -2,7 +2,6 @@ import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
-// const pluralize = require("pluralize");
 
 export function createFieldsResolver(
   type: Type,
@@ -33,15 +32,13 @@ function generateImports(type: Type, relatedFields: Field[]): string {
   let importsTemplate = '';
   let arrayFields = false;
   relatedFields.forEach((field: Field) => {
-    if (field.isArray) {
-      arrayFields = true;
-      importsTemplate += `
-import { ${type.typeName}${strings.capitalize(field.name)}Pagination } from 'application/services/dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-${strings.camelize(field.name)}-pagination.dto';`;
-    } else {
-      importsTemplate += `
-import { ${field.type} } from 'adapters/typeorm/entities/${strings.camelize(field.type)}.model';
-import { ${field.type}Service } from 'application/services/${strings.camelize(field.type)}.service';`;
-    }
+      if (field.isArray) {
+        arrayFields = true;
+        importsTemplate += `\nimport { ${type.typeName}${strings.capitalize(field.name)}Pagination } from 'application/services/dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-${strings.camelize(field.name)}-pagination.dto';`;
+      } else {
+        if (field.type !== type.typeName) importsTemplate += `\nimport{ ${field.type} } from 'adapters/typeorm/entities/${strings.camelize(field.type)}.model`
+        importsTemplate += `\nimport { ${field.type}Service } from 'application/services/${strings.camelize(field.type)}.service';`;
+      }
   });
   if (arrayFields) importsTemplate += `
 import { ${type.typeName}Service } from 'application/services/${strings.camelize(type.typeName)}.service';

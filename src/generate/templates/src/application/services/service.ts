@@ -32,8 +32,8 @@ import { ${type.typeName}CreateInput, ${type.typeName}CreateOutput } from './dto
 import { ${type.typeName}DeleteOutput } from './dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-delete.dto';
 import { ${type.typeName}GetOneOutput } from './dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-getOne.dto';
 import {
-  ${type.typeName}sPagination,
-  ${type.typeName}sPaginationArgs,
+  ${pluralize(type.typeName)}Pagination,
+  ${pluralize(type.typeName)}PaginationArgs,
 } from './dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-pagination.dto';
 import { ${type.typeName}UpdateInput, ${type.typeName}UpdateOutput } from './dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-update.dto';
 
@@ -139,11 +139,13 @@ let [forwardRefAndInjectImport, forwardReferencedServices, referencedServices] =
   if (relationships.length > 0) {
     forwardRefAndInjectImport += 'Inject, ';
     relationships.forEach((relationship) => {
-      modelsAndServices += `
+      if (relationship.type !== type.typeName) {
+        modelsAndServices += `
 import { ${relationship.type} } from 'adapters/typeorm/entities/${strings.camelize(relationship.type)}.model';
 import { ${relationship.type}Service } from './${strings.camelize(relationship.type)}.service';`;
-      if (relationship.isArray) {
-        createRelationships += `
+      }
+        if (relationship.isArray) {
+          createRelationships += `
     const mock${relationship.type} = new ${relationship.type}();
     ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)} = [mock${relationship.type}];
     if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
@@ -154,7 +156,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
         ${strings.camelize(type.typeName)}.${strings.camelize(pluralize(relationship.name, 1))}s[i].id = ${strings.camelize(relationship.type)}.id;
       }
     }`;
-        updateRelationships +=`
+          updateRelationships +=`
     if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids) {
       const linked${strings.capitalize(relationship.name)}: ${relationship.type}[] = [];
       input.${strings.camelize(pluralize(relationship.name, 1))}Ids.forEach(async (${strings.camelize(pluralize(relationship.name, 1))}Id) => {
@@ -164,25 +166,43 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
       });
       ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)} = linked${strings.capitalize(relationship.name)};
     }`;
-      if (relationship.relationType !== "selfJoinMany") {
-        relatedRepositoryImport += `
+          if (relationship.relationType !== "selfJoinMany") {
+            relatedRepositoryImport += `
     @InjectRepository(${relationship.type})
     private readonly ${strings.camelize(relationship.type)}Repository: Repository<${relationship.type}>,`;
-      }
-      } else {
-        createRelationships += `
+          }
+        } else {
+          createRelationships += `
     ${strings.camelize(type.typeName)}.${relationship.name} = new ${relationship.type}();`;
-        initRelationships += `
+          if (relationship.type === type.typeName) {
+            initRelationships += `
+    if (input.${relationship.name}Id) {
+      const ${relationship.name} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
+        where: { id: input.${relationship.name}Id },
+      });
+      ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
+    }`;
+          updateRelationships += `
+    if (input.${relationship.name}Id) {
+      ${strings.camelize(type.typeName)}.${relationship.name} = new ${relationship.type}();
+      const ${relationship.name} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
+        where: { id: input.${relationship.name}Id },
+      });
+      ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
+    }`;
+          } else {
+          initRelationships += `
     if (input.${relationship.name}Id) {
       const ${relationship.name} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(input.${relationship.name}Id);
       ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
     }`;
-        updateRelationships += `
+          updateRelationships += `
     if (input.${relationship.name}Id) {
       ${strings.camelize(type.typeName)}.${relationship.name} = new ${relationship.type}();
       const ${relationship.name} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(input.${relationship.name}Id);
       ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
     }`;
+        }
       }
     });
   }

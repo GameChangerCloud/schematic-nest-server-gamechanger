@@ -17,8 +17,8 @@ import {
 import { ${type.typeName}DeleteOutput } from 'application/services/dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-delete.dto';
 import { ${type.typeName}GetOneOutput } from 'application/services/dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-getOne.dto';
 import {
-  ${type.typeName}sPagination,
-  ${type.typeName}sPaginationArgs,
+  ${pluralize(type.typeName)}Pagination,
+  ${pluralize(type.typeName)}PaginationArgs,
 } from 'application/services/dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-pagination.dto';
 import {
   ${type.typeName}UpdateInput,
@@ -35,7 +35,7 @@ export interface I${type.typeName}Service {
 
   ${strings.camelize(type.typeName)}Delete(${strings.camelize(type.typeName)}Id: ${type.typeName}['id']): Promise<${type.typeName}DeleteOutput>;
 
-  ${strings.camelize(pluralize(type.typeName))}Pagination(args: ${pluralize(type.typeName)}PaginationArgs): Promise<${type.typeName}sPagination>;
+  ${strings.camelize(pluralize(type.typeName))}Pagination(args: ${pluralize(type.typeName)}PaginationArgs): Promise<${pluralize(type.typeName)}Pagination>;
 
   ${strings.camelize(type.typeName)}GetById(id: ${type.typeName}['id']): Promise<${type.typeName}>;
 

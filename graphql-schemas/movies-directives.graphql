@@ -1,0 +1,21 @@
+type Movie {
+  id: ID!
+  title: String! @unique
+  actors: [Actor] @hasInverse(field: movies)
+  studio: Studio!
+}
+
+type Actor {
+  id: ID!
+  name: String
+  movies: [Movie]
+}
+
+scalar RGB
+
+type Studio {
+  id: ID!
+  name: String! @selector
+  creationYear: Int @selector
+  color: RGB
+}

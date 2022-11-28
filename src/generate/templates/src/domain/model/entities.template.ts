@@ -29,7 +29,7 @@ function generateEntitieRelationsModelImportsTemplate(type: Type): string {
     let entitieRelationsModelImportsTemplate = ''
 
     type.fields.forEach(field=>{
-      if(field.relation){
+      if(field.relation && field.type !== type.typeName){
         let interfacedPrefix = field.isEnum ? '': 'I'
         let interfacedField = field.isEnum ? '': '.interface'
         entitieRelationsModelImportsTemplate += 

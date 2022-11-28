@@ -48,8 +48,10 @@ function computeImportsTemplate(type: Type): string {
     importTemplate += enumTemplate;
   })
   relationships.forEach((relationship) => {
-    const relationshipTemplate = `\nimport { ${relationship.type} } from 'adapters/typeorm/entities/${strings.camelize(relationship.type)}.model';`;
-    importTemplate += relationshipTemplate;
+    if (relationship.type !== type.typeName) {
+      const relationshipTemplate = `\nimport { ${relationship.type} } from 'adapters/typeorm/entities/${strings.camelize(relationship.type)}.model';`;
+      importTemplate += relationshipTemplate;
+    }
   })
 
   return importTemplate;
