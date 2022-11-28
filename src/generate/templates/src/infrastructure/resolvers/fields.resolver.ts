@@ -36,7 +36,7 @@ function generateImports(type: Type, relatedFields: Field[]): string {
         arrayFields = true;
         importsTemplate += `\nimport { ${type.typeName}${strings.capitalize(field.name)}Pagination } from 'application/services/dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-${strings.camelize(field.name)}-pagination.dto';`;
       } else {
-        if (field.type !== type.typeName) importsTemplate += `\nimport{ ${field.type} } from 'adapters/typeorm/entities/${strings.camelize(field.type)}.model`
+        if (field.type !== type.typeName) importsTemplate += `\nimport { ${field.type} } from 'adapters/typeorm/entities/${strings.camelize(field.type)}.model';`
         importsTemplate += `\nimport { ${field.type}Service } from 'application/services/${strings.camelize(field.type)}.service';`;
       }
   });
