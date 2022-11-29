@@ -244,7 +244,7 @@ function computePaginationTemplates(types: Type[], type: Type): string[] {
   let paginationArgsImport = "";
   let fieldPaginationImport = "";
   let fieldPaginationMethod = "";
-  const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.isArray && field.relationType);
+  const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.isArray);
   if (relatedFields.length > 0) {
     paginationArgsImport = 'PaginationArgs, ';
     relatedFields.forEach((relatedField) => {

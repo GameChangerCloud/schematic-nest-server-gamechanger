@@ -1,0 +1,53 @@
+"""
+This schema should generate 2 classes
+----------------  Category.ts -----------------
+
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
+import { Category } from "./Question"
+
+@Entity()
+export class Category {
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @Column()
+    name: string
+
+    @ManyToMany(() => Question)
+    questions: Question[]
+}
+
+----------------  Question.ts -----------------
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from "typeorm"
+import { Category } from "./Category"
+
+@Entity()
+export class Question {
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @Column()
+    title: string
+
+    @Column()
+    text: string
+
+    @Column()
+    answer: string
+
+    @ManyToMany(() => Category)
+    @JoinTable()
+    categories: Category[]
+}
+"""
+type Category {
+  name: String! @unique
+  questions: [Question]
+}
+
+type Question {
+  title: String
+  text: String
+  anwser: String
+  categories: [Category] @Join(field: questions)
+}

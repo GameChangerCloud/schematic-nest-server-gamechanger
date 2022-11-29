@@ -16,7 +16,7 @@
       "type": "string",
       "description": "Path of the graphQl schema",
       "minLength": 1,
-      "default": "typeORM-oneOnly.graphql",
+      "default": "typeORM-manyToMany.graphql",
       "x-prompt": "Please fill the name of your graphQL schema (put schema file in : <your-schema-name>.graphql)"
     }
   },

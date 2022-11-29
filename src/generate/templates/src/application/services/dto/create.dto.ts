@@ -96,13 +96,15 @@ function computeScalarsTemplate(type: Type): string[] {
   });
 
   let validatorsToImportString = "";
+  let validatorsImportTemplate = "";
   if (validatorsToImportList.length > 0) {
     for (let i = 0; i < validatorsToImportList.length; i++) {
       if (i === validatorsToImportList.length - 1) validatorsToImportString += `${validatorsToImportList[i]}`;
       else validatorsToImportString += `${validatorsToImportList[i]}, `;
     }
+    validatorsImportTemplate = `\nimport { ${validatorsToImportString} } from 'class-validator';`;
   }
-  const validatorsImportTemplate = `\nimport { ${validatorsToImportString} } from 'class-validator';`;
+  
 
   return [stdScalarsTemplate, validatorsImportTemplate];
 }

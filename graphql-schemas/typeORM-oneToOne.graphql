@@ -1,0 +1,56 @@
+"""
+This schema should generate 2 classes
+----------------  Profile.ts -----------------
+
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
+import { User } from "./User"
+
+@Entity()
+export class Profile {
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @Column()
+    gender: string
+
+    @Column()
+    photo: string
+
+    @OneToOne(
+      () => User,
+      (user) => user.profile,
+    )
+    user: User
+}
+
+----------------  User.ts -----------------
+
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from "typeorm"
+import { Profile } from "./Profile"
+
+@Entity()
+export class User {
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @Column()
+    name: string
+
+    @OneToOne(
+      () => Profile,
+      (profile) => profile.user,
+    )
+    @JoinColumn()
+    profile: Profile
+}
+"""
+type Profile {
+  gender: String
+  photo: String
+  user: User
+}
+
+type User {
+  name: String
+  profile: Profile @Join(field: user)
+}

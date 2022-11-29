@@ -58,6 +58,7 @@ export function generate(_options: any): Rule {
      */
 
     let types = initTypes(_options.graphqlFile);
+    console.log(types);
 
 
     /**
@@ -67,6 +68,7 @@ export function generate(_options: any): Rule {
     //const rules: Rule[] = [];
 
     types.forEach((type) => {
+      console.log(type.fields);
       if (type.type === 'ObjectTypeDefinition' && type.isNotOperation()) {
         createModule(type, _tree, _options.name);
         createServiceInterface(type, _tree, _options.name);

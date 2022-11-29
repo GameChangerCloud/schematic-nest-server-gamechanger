@@ -1,6 +1,7 @@
 import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
+import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
 
 
 export function createTypeOrmEntityFile(
@@ -12,9 +13,10 @@ export function createTypeOrmEntityFile(
   let typeName = type.typeName;
 
   let entityFiletemplate = `import {
-  Entity, 
+  Entity,
   Column,
   JoinColumn,
+  JoinTable,
   ${generateTypeOrmRelationsImportTemplate(type)}} from 'typeorm';
 
 import { Field, ObjectType } from '@nestjs/graphql';
@@ -52,13 +54,14 @@ function generateTypeOrmRelationsImportTemplate(type: Type): string {
     manyOnly: 'OneToMany',
     selfJoinMany: 'ManyToMany',
     manyToMany: 'ManyToMany',
-
+    oneToOneJoin: 'OneToOne',
+    manyToManyJoin: 'ManyToMany',
   };
   let typeOrmRelationsImportTemplate = `RelationId,\n`;
 
   type.relationList.forEach(
     (result: {
-      relation: 'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany';
+      relation: 'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany' | 'oneToOneJoin' | 'manyToManyJoin';
       type: string;
     }) => {
       let relation = typeRelationsToTypeOrmImport[result.relation];
@@ -84,7 +87,7 @@ function generateEntityRelationsModelImportsTemplate(
 
   type.relationList.forEach(
     (relation: {
-      relation: 'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany' ;
+      relation: 'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany' | 'oneToOneJoin' | 'manyToManyJoin' ;
       type: string;
     }) => {
       if (relation.type !== type.typeName) {
@@ -112,7 +115,13 @@ function generateEntityFieldsTemplate(type: Type): string {
     if(field.type !== 'ID'){
     const arrayCharacter = field.isArray ? "[]" : "";
     const nullOption = field.noNull ? "" : ", { nullable: true }";
-    const uniqueOption = field.noNull ? "" : "\n    unique: true,\n";
+    const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "unique");
+    let uniqueOption = "";
+    if (uniqueDirective) {
+      console.log('unique');
+      uniqueOption = "\n    unique: true,\n";
+    }
+    
     const nullColumn = field.noNull ? "" : "\n    nullable: true,\n";
     const nullField = field.noNull ? "" : "?";
     const nullType = field.noNull ? "" : " | null";
@@ -121,7 +130,7 @@ function generateEntityFieldsTemplate(type: Type): string {
     const relation = type.relationList.find(relation => relation.type === field.type)
     const relatedFieldName = relation ? relation.relatedFieldName : "";
     // const pluralRelationName = field.isArray && field.relationType !== 'manyToOne' && field.name !== type.typeName ? "s" : "";
-    const singleRelation = field.relationType !== 'oneOnly' ? `, (${strings.decamelize(field.type)}) => ${strings.decamelize(field.type)}.${relatedFieldName},`: ","
+    const singleRelation = field.relationType !== 'oneOnly' && field.relationType !== 'manyOnly' ? `, (${strings.decamelize(field.type)}) => ${strings.decamelize(field.type)}.${relatedFieldName},`: ","
     const relationDeleteOption = `{\n    onDelete: 'SET NULL',\n  }`;
     let arrayBracketStart = '';
     let arrayBracketEnd = ''
@@ -134,8 +143,7 @@ function generateEntityFieldsTemplate(type: Type): string {
 
     let JSFieldType = field.isEnum ? field.type : field.type.toLowerCase();
     field.relation && !field.isEnum ? 
-    fieldTemplate += `\n  @${getTypeOrmRelation(field.relationType)}(() => ${strings.capitalize(field.type)}${singleRelation} ${relationDeleteOption})
-  @JoinColumn()
+    fieldTemplate += `\n  @${getTypeOrmRelation(field.relationType)}(() => ${strings.capitalize(field.type)}${singleRelation} ${relationDeleteOption})${getJoinInstructions(type, field, relatedFieldName)}
   ${field.name}: ${field.type}${arrayCharacter};\n
   @RelationId((self: ${type.typeName}) => self.${field.name})
   readonly ${strings.camelize(field.name)}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n` 
@@ -153,7 +161,7 @@ function generateEntityFieldsTemplate(type: Type): string {
   return entityFieldstemplate;
 }
 
-function getTypeOrmRelation(relation:'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany'){
+function getTypeOrmRelation(relation:'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany'| 'oneToOneJoin' | 'manyToManyJoin'){
   let typeRelationsToTypeOrmImport = {
     oneOnly: 'OneToOne',
     oneToOne: 'OneToOne',
@@ -163,8 +171,30 @@ function getTypeOrmRelation(relation:'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'o
     manyOnly: 'OneToMany',
     selfJoinMany: 'ManyToMany',
     manyToMany: 'ManyToMany',
+    oneToOneJoin: 'OneToOne',
+    manyToManyJoin: 'ManyToMany',
   };
 
   return typeRelationsToTypeOrmImport[relation]
 }
 
+function getJoinInstructions(type: Type, field: Field, relatedFieldName: string): string {
+  let joinInstructions = ``;
+  if (field.relationType === 'oneToOneJoin') joinInstructions += `\n  @JoinColumn({\n    name: '${field.name}_id,'\n  })`;
+  if (field.relationType === 'manyToManyJoin') joinInstructions += 
+`\n  @JoinTable({
+    name: "${relatedFieldName}_${field.name}",
+    joinColumn: {
+      name: "${strings.camelize(type.typeName)}",
+      referencedColumnName: "id",
+    },
+    inverseJoinColumn: {
+      name: "${strings.camelize(field.type)}",
+      referencedColumnName: "id",
+    },
+  })`;
+  if (field.relationType === 'oneOnly' || field.relationType === 'manyOnly' || field.relationType === 'oneToMany' || field.relationType === 'manyToOne' || field.relationType === 'selfJoinOne' || field.relationType === 'selfJoinMany')
+    joinInstructions = `JoinColumn()`;
+
+  return joinInstructions;
+}
