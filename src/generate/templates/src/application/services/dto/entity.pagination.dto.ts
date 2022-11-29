@@ -18,10 +18,7 @@ import {
 } from 'application/services/dto/pagination/pagination.dto';
 
 @InputType()
-export class ${pluralize(type.typeName)}PaginationSortBy extends PaginationSortBy {
-  @Field(() => SortDirection, { nullable: true })
-  ${type.fields[1].name.toLocaleLowerCase()}?: SortDirection;
-}
+export class ${pluralize(type.typeName)}PaginationSortBy extends PaginationSortBy {${handleSortingArguments(type)}}
 
 @ArgsType()
 export class ${pluralize(type.typeName)}PaginationArgs extends PaginationArgs {
@@ -44,4 +41,13 @@ export class ${pluralize(type.typeName)}Pagination extends Pagination {
     }-pagination.dto.ts`,
       fileTemplate
     );
+}
+
+function handleSortingArguments(type: Type): string {
+  let sortingArgs = "";
+  type.fields.forEach((field) => {
+    if(field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "SortBy"))
+    sortingArgs += `\n  @Field(() => SortDirection, { nullable: true })\n  ${strings.camelize(field.name)}?: SortDirection;\n`;
+  });
+  return sortingArgs;
 }

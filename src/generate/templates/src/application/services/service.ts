@@ -79,13 +79,7 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
           '${strings.camelize(type.typeName)}.createdAt',
           args.sortBy.createdAt === SortDirection.ASC ? 'ASC' : 'DESC',
         );
-      }
-      if (args.sortBy.${type.fields[1].name} !== null) {
-        queryBuilder.addOrderBy(
-          '${strings.camelize(type.typeName)}.${type.fields[1].name}',
-          args.sortBy.${type.fields[1].name} === SortDirection.ASC ? 'ASC' : 'DESC',
-        );
-      }
+      }${handleSortingInstructions(type)}
     }
     const [nodes, totalCount] = await queryBuilder.getManyAndCount();
     return { nodes, totalCount };
@@ -153,7 +147,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
         const ${strings.camelize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(
           input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i],
         );
-        ${strings.camelize(type.typeName)}.${strings.camelize(pluralize(relationship.name, 1))}s[i].id = ${strings.camelize(relationship.type)}.id;
+        ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)}[i].id = ${strings.camelize(relationship.type)}.id;
       }
     }`;
           updateRelationships +=`
@@ -283,4 +277,18 @@ import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } fr
     }); 
   }
   return [paginationArgsImport, fieldPaginationImport, fieldPaginationMethod];
+}
+
+function handleSortingInstructions(type: Type): string {
+  let sortingInstructions = "";
+  type.fields.forEach((field) => {
+    if(field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "SortBy"))
+    sortingInstructions += `\n      if (args.sortBy.${field.name} !== null) {
+        queryBuilder.addOrderBy(
+          '${strings.camelize(type.typeName)}.${field.name}',
+          args.sortBy.${field.name} === SortDirection.ASC ? 'ASC' : 'DESC',
+        );
+      }`;
+  });
+  return sortingInstructions;
 }

@@ -41,13 +41,14 @@ export class Question {
 }
 """
 type Category {
-  name: String! @unique
+  identification: ID!
+  name: String! @Unique
   questions: [Question]
 }
 
 type Question {
-  title: String
-  text: String
+  title: String @SortBy
+  text: String @SortBy
   anwser: String
   categories: [Category] @Join(field: questions)
 }

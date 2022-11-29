@@ -5,11 +5,11 @@ import { Type } from 'easygraphql-parser-gamechanger';
 export function createTypeOrmEnumFile(type: Type, _tree: Tree, projectName: string) {
 
   let typeName = type.typeName
-  let entitieEnumListTemplate = generateEntitieEnumListTemplate(type)
+  let entityEnumListTemplate = generateEntityEnumListTemplate(type)
   let enumFileTemplate =
 `import { registerEnumType } from '@nestjs/graphql';
 
-${entitieEnumListTemplate}
+${entityEnumListTemplate}
 
 registerEnumType(${typeName}, {
   name: '${typeName}',
@@ -22,14 +22,14 @@ registerEnumType(${typeName}, {
   );
 }
 
-function generateEntitieEnumListTemplate(type:Type): string{
+function generateEntityEnumListTemplate(type:Type): string{
   let typeName = type.typeName
   let enumListTemplate = ``
   type.values.forEach((value:string)=>{
     enumListTemplate += `  ${value} = '${value.toLocaleLowerCase()}',\n`
   })
-    let entitieEnumListTemplate = 
+    let entityEnumListTemplate = 
 `export enum ${typeName} {
 ${enumListTemplate}}`
-  return entitieEnumListTemplate
+  return entityEnumListTemplate
 }

@@ -14,20 +14,20 @@ export function createTypeOrmEntityFile(
 
   let entityFiletemplate = `import {
   Entity,
-  Column,
+  Column,${generateEntityRelationsModelImportsTemplate(type, types)[0]}
   JoinColumn,
   JoinTable,
   ${generateTypeOrmRelationsImportTemplate(type)}} from 'typeorm';
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ${generateEntityRelationsModelImportsTemplate(type, types)[1]}ObjectType } from '@nestjs/graphql';
 import { I${typeName} as ${typeName}Model } from 'domain/model/${strings.decamelize(
     typeName
   )}.interface';
 import { Node } from './node.model';
-${generateEntityRelationsModelImportsTemplate(type, types)}
+${generateEntityRelationsModelImportsTemplate(type, types)[2]}
 @Entity({ name: '${strings.decamelize(typeName)}' })
 @ObjectType()
-export class ${typeName} extends Node implements ${typeName}Model {${generateEntityFieldsTemplate(type)}
+export class ${typeName} extends Node implements ${typeName}Model {${generateEntityFieldsTemplate(types, type)}
 }
 `;
 
@@ -81,9 +81,23 @@ function generateTypeOrmRelationsImportTemplate(type: Type): string {
 function generateEntityRelationsModelImportsTemplate(
   type: Type,
   types: Type[]
-): string {
-  types
+): string[] {
   let entityRelationsModelImportsTemplate = ``;
+  let primaryColumnImport = ``;
+  let idImport = ``;
+  let nodeId = true;
+  types.forEach((type) => {
+    if (type.fields.find((field => field.type === "ID"))) {
+      nodeId = false;
+      idImport = `ID, `;
+    }
+  });
+
+  const idField = type.fields.find((field => field.type === "ID"));
+  if (idField) {
+    idImport = `ID, `;
+    primaryColumnImport = `\n  PrimaryColumn, `;
+  } else if (!nodeId) primaryColumnImport = `\n  PrimaryGeneratedColumn, `;
 
   type.relationList.forEach(
     (relation: {
@@ -101,24 +115,31 @@ function generateEntityRelationsModelImportsTemplate(
     }
   );
 
-  return entityRelationsModelImportsTemplate;
+  return [primaryColumnImport, idImport, entityRelationsModelImportsTemplate];
 }
 
 /**
  * @param type 
  * @returns generate typeORM entities field for the given type
  */
-function generateEntityFieldsTemplate(type: Type): string {
-  let entityFieldstemplate = ``
+function generateEntityFieldsTemplate(types: Type[], type: Type): string {
+  let entityFieldstemplate = ``;
+  let nodeId = true;
+  const idField = type.fields.find((field => field.type === "ID"));
+  if (idField) entityFieldstemplate += `\n  @Field(() => ID)\n  @PrimaryColumn()\n  ${idField.name}: string\n`;
+  types.forEach((type) => {
+    if (type.fields.find((field => field.type === "ID"))) nodeId = false;
+  });
+  if (!nodeId && !idField) entityFieldstemplate += `\n  @Field(() => ID)\n  @PrimaryGeneratedColumn('uuid')\n  id: string\n`;
+
 
   type.fields.forEach((field:any)=>{
     if(field.type !== 'ID'){
     const arrayCharacter = field.isArray ? "[]" : "";
     const nullOption = field.noNull ? "" : ", { nullable: true }";
-    const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "unique");
+    const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "unique");
     let uniqueOption = "";
     if (uniqueDirective) {
-      console.log('unique');
       uniqueOption = "\n    unique: true,\n";
     }
     

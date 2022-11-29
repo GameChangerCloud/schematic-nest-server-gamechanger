@@ -1,0 +1,30 @@
+"""
+This schema should generate 1 class
+----------------  Service.ts -----------------
+
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
+
+@Entity()
+export class Service extends BaseEntity {
+    @PrimaryGeneratedColumn()
+    id: number
+
+    @Column()
+    @Index({ unique: true })
+    title: string
+
+    @Column()
+    fonction: string
+
+    @ManyToOne((type) => Category, (category) => category.childCategories)
+    parentCategory: Category
+
+    @OneToMany((type) => Category, (category) => category.parentCategory)
+    childCategories: Category[]
+}
+"""
+type Service {
+  title: String
+  fonction: String
+  services: [Service]
+}

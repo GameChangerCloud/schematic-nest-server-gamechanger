@@ -20,16 +20,16 @@ import { createModule } from './templates/src/infrastructure/module';
 import { createServiceInterface } from './templates/src/domain/service.interface';
 import { createTypeOrmEntityFile } from './templates/src/adapters/typeorm/entities/entities.model';
 import { createTypeOrmEnumFile } from './templates/src/adapters/typeorm/entities/enum.model';
-import { createDomainModelInterfaceFile } from './templates/src/domain/model/entities.template';
-import { createDomainModelEnumFile } from './templates/src/domain/model/enum.template';
 import { createAppModule } from './templates/src/infrastructure/main.module';
 import { createMutationsResolver } from './templates/src/infrastructure/resolvers/mutations.resolver';
 import { createFieldsResolver } from './templates/src/infrastructure/resolvers/fields.resolver';
 import { createQueriesResolver } from './templates/src/infrastructure/resolvers/queries.resolver';
 import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
 import { createDatasource } from './templates/src/adapters/typeorm/datasource';
-// import {createEntitieQueriesResolverFile} from './templates/src/infrastucture/resolvers/entitie.queries.resolver'
-// import {createEntitieFieldsResolverFile} from './templates/src/infrastucture/resolvers/entitie.fields.resolver'
+import { createNodeModel } from './templates/src/adapters/typeorm/entities/node.model';
+import { createDomainModelInterfaceFile } from './templates/src/domain/model/entities.model.interface';
+import { createDomainModelEnumFile } from './templates/src/domain/model/enum.model.interface';
+import { createNodeModelInterface } from './templates/src/domain/model/node.model.interface';
 const fs = require('fs');
 const path = require('path');
 
@@ -58,8 +58,6 @@ export function generate(_options: any): Rule {
      */
 
     let types = initTypes(_options.graphqlFile);
-    console.log(types);
-
 
     /**
      * NEST SERVER GENERATION
@@ -68,7 +66,6 @@ export function generate(_options: any): Rule {
     //const rules: Rule[] = [];
 
     types.forEach((type) => {
-      console.log(type.fields);
       if (type.type === 'ObjectTypeDefinition' && type.isNotOperation()) {
         createModule(type, _tree, _options.name);
         createServiceInterface(type, _tree, _options.name);
@@ -87,7 +84,7 @@ export function generate(_options: any): Rule {
         }
         createService(types, type, _tree, _options.name);
         createTypeOrmEntityFile(type,types, _tree, _options.name);
-        createDomainModelInterfaceFile(type, _tree, _options.name);
+        createDomainModelInterfaceFile(types, type, _tree, _options.name);
         createMutationsResolver(type, _tree, _options.name);
         createQueriesResolver(type, _tree, _options.name);
       } else if (type.type === 'EnumTypeDefinition') {
@@ -99,6 +96,8 @@ export function generate(_options: any): Rule {
 
     createAppModule(types, _tree, _options.name);
     createDatasource(types, _tree, _options.name);
+    createNodeModel(types, _tree, _options.name);
+    createNodeModelInterface(types, _tree, _options.name);
 
     const templateSource = apply(url('./app'), [
       template({
@@ -120,7 +119,6 @@ export function generate(_options: any): Rule {
  * Find types structure from gamechanger-parser there:
  * https://github.com/GameChangerCloud/easygraphql-parser-gamechanger
  * OR https://www.notion.so/GameChanger-df7d7d25885144e9a4f185a272f91e7a
- * TODO : Use filename path
  * TODO : Return schema error | Return error if file not found
  * @returns types
  */
