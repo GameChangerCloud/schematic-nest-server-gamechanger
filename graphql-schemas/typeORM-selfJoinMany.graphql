@@ -27,4 +27,10 @@ type Service {
   title: String
   fonction: String
   services: [Service]
+  domain: Domain
+}
+
+type Domain {
+  title: String
+  services: [Service]
 }

@@ -2,7 +2,7 @@ import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
-
+const pluralize = require('pluralize');
 
 export function createTypeOrmEntityFile(
   type: Type,
@@ -45,33 +45,37 @@ export class ${typeName} extends Node implements ${typeName}Model {${generateEnt
  * @returns typeORM relations imports from type relations
  */
 function generateTypeOrmRelationsImportTemplate(type: Type): string {
-  let typeRelationsToTypeOrmImport = {
-    oneOnly: 'OneToOne',
-    oneToOne: 'OneToOne',
-    selfJoinOne: 'OneToOne',
-    oneToMany: 'ManyToOne',
-    manyToOne: 'OneToMany',
-    manyOnly: 'OneToMany',
-    selfJoinMany: 'ManyToMany',
-    manyToMany: 'ManyToMany',
-    oneToOneJoin: 'OneToOne',
-    manyToManyJoin: 'ManyToMany',
-  };
-  let typeOrmRelationsImportTemplate = `RelationId,\n`;
-
-  type.relationList.forEach(
-    (result: {
-      relation: 'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany' | 'oneToOneJoin' | 'manyToManyJoin';
-      type: string;
-    }) => {
-      let relation = typeRelationsToTypeOrmImport[result.relation];
-      !typeOrmRelationsImportTemplate.includes(relation)
-        ? (typeOrmRelationsImportTemplate += '  ' + relation + ',\n')
-        : '';
-    }
-  );
-
-  return typeOrmRelationsImportTemplate;
+  let relationshipsToImport: string[] = [];
+  relationshipsToImport.push('RelationId');
+  type.relationList.forEach((relationship: { type: string, relation: string, relatedFieldName: string }) => {
+      if (!relationshipsToImport.includes(relationship.relation)) {
+        switch (relationship.relation) {
+          case 'oneOnly':
+            relationshipsToImport.push('OneToOne');
+            break;
+          case 'manyOnly':
+            relationshipsToImport.push('OneToMany');
+            break;
+          case 'selfJoinOne':
+            relationshipsToImport.push('OneToOne');
+            break;
+          case 'selfJoinMany':
+            relationshipsToImport.push('OneToMany', 'ManyToOne');
+            break;
+          case 'manyToOne':
+            relationshipsToImport.push('OneToMany');
+            break;
+          case 'oneToMany':
+            relationshipsToImport.push('ManyToOne');
+            break;
+          default:
+            relationshipsToImport.push(relationship.relation.charAt(0).toUpperCase() + relationship.relation.slice(1));
+            break;
+        }
+      }
+    });
+    relationshipsToImport = relationshipsToImport.filter((item, index) => relationshipsToImport.indexOf(item) === index);
+  return relationshipsToImport.join(',\n  ') + '\n';
 }
 
 /**
@@ -123,18 +127,18 @@ function generateEntityRelationsModelImportsTemplate(
  * @returns generate typeORM entities field for the given type
  */
 function generateEntityFieldsTemplate(types: Type[], type: Type): string {
-  let entityFieldstemplate = ``;
+  let entityFieldsTemplate = ``;
   let nodeId = true;
   const idField = type.fields.find((field => field.type === "ID"));
-  if (idField) entityFieldstemplate += `\n  @Field(() => ID)\n  @PrimaryColumn()\n  ${idField.name}: string\n`;
+  if (idField) entityFieldsTemplate += `\n  @Field(() => ID)\n  @PrimaryColumn()\n  ${idField.name}: string\n`;
   types.forEach((type) => {
     if (type.fields.find((field => field.type === "ID"))) nodeId = false;
   });
-  if (!nodeId && !idField) entityFieldstemplate += `\n  @Field(() => ID)\n  @PrimaryGeneratedColumn('uuid')\n  id: string\n`;
+  if (!nodeId && !idField) entityFieldsTemplate += `\n  @Field(() => ID)\n  @PrimaryGeneratedColumn('uuid')\n  id: string\n`;
 
 
   type.fields.forEach((field:any)=>{
-    if(field.type !== 'ID'){
+    if(field.type !== 'ID' && field.relationType !== "selfJoinMany"){
     const arrayCharacter = field.isArray ? "[]" : "";
     const nullOption = field.noNull ? "" : ", { nullable: true }";
     const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "unique");
@@ -173,13 +177,25 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
   @Column({${nullColumn + enumOptions + uniqueOption}  })
   ${field.name}${nullField}: ${JSFieldType}${arrayCharacter};\n`
 
-    entityFieldstemplate += fieldTemplate
+    entityFieldsTemplate += fieldTemplate
 
+    } else if (field.relationType === 'selfJoinMany') {
+      entityFieldsTemplate += `\n  @ManyToOne(() => ${field.type}, (${strings.camelize(field.type)}) => ${strings.camelize(field.type)}.child${strings.capitalize(pluralize(field.name))}, {
+    onDelete: 'SET NULL',
+  })
+  parent${strings.capitalize(pluralize(field.name, 1))}: ${field.type};
+
+  @OneToMany(() => ${field.type}, (${strings.camelize(field.type)}) => ${strings.camelize(field.type)}.parent${strings.capitalize(pluralize(field.name, 1))}, {
+    onDelete: 'SET NULL',
+  })
+  child${strings.capitalize(pluralize(field.name))}: ${field.type}[];\n
+  @RelationId((self: ${type.typeName}) => self.child${strings.capitalize(pluralize(field.name))})
+  readonly child${strings.capitalize(pluralize(field.name, 1))}Ids?: ${field.type}['id'][] | null;\n`
     }
 
   })
   
-  return entityFieldstemplate;
+  return entityFieldsTemplate;
 }
 
 function getTypeOrmRelation(relation:'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany'| 'oneToOneJoin' | 'manyToManyJoin'){
@@ -215,7 +231,7 @@ function getJoinInstructions(type: Type, field: Field, relatedFieldName: string)
     },
   })`;
   if (field.relationType === 'oneOnly' || field.relationType === 'manyOnly' || field.relationType === 'oneToMany' || field.relationType === 'manyToOne' || field.relationType === 'selfJoinOne' || field.relationType === 'selfJoinMany')
-    joinInstructions = `JoinColumn()`;
+    joinInstructions = `\n  @JoinColumn()`;
 
   return joinInstructions;
 }

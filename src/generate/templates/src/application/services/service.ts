@@ -139,8 +139,32 @@ import { ${relationship.type} } from 'adapters/typeorm/entities/${strings.cameli
 import { ${relationship.type}Service } from './${strings.camelize(relationship.type)}.service';`;
       }
         if (relationship.isArray) {
-          createRelationships += `
-    const mock${relationship.type} = new ${relationship.type}();
+          createRelationships += `\n  const mock${relationship.type} = new ${relationship.type}();`;
+          if (relationship.type === type.typeName) {
+            createRelationships += `
+    ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))} = [mock${relationship.type}];
+    if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
+      for (let i = 0; i < input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length; i++) {
+        const child${strings.capitalize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
+          where: { id: input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i] },
+        });
+        ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))}[i].id = child${strings.capitalize(relationship.type)}.id;
+      }
+    }`;
+          updateRelationships +=`
+    if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids) {
+      const linked${strings.capitalize(relationship.name)}: ${relationship.type}[] = [];
+      input.${strings.camelize(pluralize(relationship.name, 1))}Ids.forEach(async (${strings.camelize(pluralize(relationship.name, 1))}Id) => {
+        linked${strings.capitalize(relationship.name)}.push(
+          await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
+            where: { id: ${strings.camelize(pluralize(relationship.name, 1))}Id },
+          }),
+        );
+      });
+      ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))} = linked${strings.capitalize(relationship.name)};
+    }`;
+          } else {
+            createRelationships += `
     ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)} = [mock${relationship.type}];
     if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
       for (let i = 0; i < input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length; i++) {
@@ -160,11 +184,12 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
       });
       ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)} = linked${strings.capitalize(relationship.name)};
     }`;
-          if (relationship.relationType !== "selfJoinMany") {
-            relatedRepositoryImport += `
+          relatedRepositoryImport += `
     @InjectRepository(${relationship.type})
     private readonly ${strings.camelize(relationship.type)}Repository: Repository<${relationship.type}>,`;
+          
           }
+          
         } else {
           createRelationships += `
     ${strings.camelize(type.typeName)}.${relationship.name} = new ${relationship.type}();`;
@@ -244,8 +269,9 @@ function computePaginationTemplates(types: Type[], type: Type): string[] {
     relatedFields.forEach((relatedField) => {
       const relatedType = types.find((type) => type.typeName === relatedField.type);
       if (relatedType){
-        const fieldInRelatedType = relatedType.fields.find((field) => field.type === type.typeName);
-        if (fieldInRelatedType) {
+        let fieldInRelatedTypeName = relatedType.fields.find((field) => field.type === type.typeName)?.name;
+        if (relatedField.relationType === "selfJoinMany") fieldInRelatedTypeName = `parent${strings.capitalize(pluralize(relatedField.name, 1))}`;
+        if (fieldInRelatedTypeName) {
           fieldPaginationImport += `
 import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } from './dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-${strings.camelize(relatedField.name)}-pagination.dto';`;
                 fieldPaginationMethod += `
@@ -257,7 +283,7 @@ import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } fr
       skip: args.skip,
       take: args.take,
       where: {
-        ${fieldInRelatedType.name}: {
+        ${fieldInRelatedTypeName}: {
           id: ${strings.camelize(type.typeName)}Id,
         },
       },
@@ -266,7 +292,7 @@ import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } fr
           args.sortBy?.createdAt === SortDirection.ASC ? 'ASC' : 'DESC',
       },
     });
-          
+
     return {
       nodes,
       totalCount,
