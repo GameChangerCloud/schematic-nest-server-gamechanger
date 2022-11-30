@@ -1,0 +1,31 @@
+"""
+This schema should test directives generation : 
+- @unique 
+- @length(min,max) 
+- @Join(field)
+- @deprecated 
+- @SortBy 
+- @double X
+- @long X
+----------------  Entity.ts -----------------
+
+
+"""
+
+type Profile {
+  gender: String @unique
+  photo: String @SortBy 
+  rating: Float @double
+  user: User
+}
+
+type User {
+  name: String! @length(min: 3, max: 10)
+  pseudo: String! @length(min: 3)
+  game_pseudo: String @deprecated
+  age: Int @long
+  sub_age: Int @float
+  profile: Profile @Join(field: user)
+}
+
+

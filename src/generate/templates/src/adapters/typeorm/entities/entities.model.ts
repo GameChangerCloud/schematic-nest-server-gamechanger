@@ -133,6 +133,8 @@ function generateEntityRelationsModelImportsTemplate(
  * @returns generate typeORM entities field for the given type
  */
 function generateEntityFieldsTemplate(types: Type[], type: Type): string {
+  
+  
   let entityFieldsTemplate = ``;
   let nodeId = true;
   const idField = type.fields.find((field => field.type === 'ID'));
@@ -144,14 +146,24 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
 
 
   type.fields.forEach((field:any)=>{
-    if(field.type !== 'ID' && field.relationType !== 'selfJoinMany'){
-    const arrayCharacter = field.isArray ? '[]' : '';
-    const nullOption = field.noNull ? '' : ', { nullable: true }';
-    const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === 'unique');
-    let uniqueOption = '';
-    if (uniqueDirective) {
-      uniqueOption = '\n    unique: true,\n';
-    }
+    console.log('TYPE DIRECTIVES :',field.directives);
+    let deprecatedField = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "deprecated");
+
+    if(field.type !== 'ID' && field.relationType !== "selfJoinMany" && !deprecatedField){
+      
+    const arrayCharacter = field.isArray ? "[]" : "";
+    const nullOption = field.noNull ? "" : ", { nullable: true }";
+    const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "unique");
+    const longDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "long");
+    const doubleDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "double");
+
+    let uniqueOption = "";
+    let longIntOption = ''
+    let floatOption = ''
+    longDirective ? longIntOption = 'type: "bigint"' : ''
+    doubleDirective ? floatOption = 'type: "double"' : ''
+    uniqueDirective ? uniqueOption = "\n    unique: true,\n": '';
+    
     
     const nullColumn = field.noNull ? '' : '\n    nullable: true,\n';
     const nullField = field.noNull ? '' : '?';
@@ -167,12 +179,14 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     let arrayBracketEnd = ''
     if (field.isEnum && field.isArray) { 
       arrayBracketStart = '[';
-      arrayBracketEnd = ']';}
-    field.type === 'Int' ? field.type = 'Number': ''
-
+      arrayBracketEnd = ']';
+    }
+    
+    field.type === 'Float' ? floatOption = " type: 'numeric', precision: 10, scale: 2 " : ''
+    field.type === 'Int' || field.type === 'Float' ? field.type = 'Number': ''
     let fieldTemplate = ``
-
     let JSFieldType = field.isEnum ? field.type : field.type.toLowerCase();
+    
     field.relation && !field.isEnum ? 
     fieldTemplate += `\n  @${getTypeOrmRelation(field.relationType)}(() => ${strings.capitalize(field.type)}${singleRelation} ${relationDeleteOption})${getJoinInstructions(type, field, relatedFieldName)}
   ${field.name}: ${field.type}${arrayCharacter};\n
@@ -180,7 +194,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
   readonly ${strings.camelize(pluralize(field.name, 1))}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n` 
     : 
     fieldTemplate += `\n  @Field(() => ${arrayBracketStart}${field.type}${nullOption}${arrayBracketEnd})
-  @Column({${nullColumn + enumOptions + uniqueOption}  })
+  @Column({${nullColumn + enumOptions + uniqueOption + longIntOption + floatOption}  })
   ${field.name}${nullField}: ${JSFieldType}${arrayCharacter};\n`
 
     entityFieldsTemplate += fieldTemplate
