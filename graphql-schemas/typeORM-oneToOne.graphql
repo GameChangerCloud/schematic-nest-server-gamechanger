@@ -51,6 +51,6 @@ type Profile {
 }
 
 type User {
-  name: String
+  name: String 
   profile: Profile @Join(field: user)
 }

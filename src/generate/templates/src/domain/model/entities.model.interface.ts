@@ -47,18 +47,18 @@ function generateEntityRelationsModelImportsTemplate(type: Type): string {
 function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     let template = '';
     let nodeId = true;
-    const idField = type.fields.find((field => field.type === "ID"));
-    if (idField) template += `  ${idField.name}: string\n`;
+    const idField = type.fields.find((field => field.type === 'ID'));
+    if (idField) template += `  id: string;\n`;
     types.forEach((type) => {
-      if (type.fields.find((field: Field) => field.type === "ID")) nodeId = false;
+      if (type.fields.find((field: Field) => field.type === 'ID')) nodeId = false;
     });
-    if (!nodeId && !idField) template += `  id: string\n`;
+    if (!nodeId && !idField) template += `  id: string;\n`;
 
     type.fields.forEach(field=>{
 
-      const nullField = field.noNull ? "" : "?";
-      const arrayCharacter = field.isArray ? "[]" : "";
-      const plurals = field.isArray ? "s":''
+      const nullField = field.noNull ? '' : '?';
+      const arrayCharacter = field.isArray ? '[]' : '';
+      const plurals = field.isArray ? 's':''
       let interfacedField = ''
       if(field.type !== 'String' && field.type !== 'Number' && field.type !== 'Boolean' && !field.isEnum && field.type !== 'ID' ) {
         interfacedField = 'I';

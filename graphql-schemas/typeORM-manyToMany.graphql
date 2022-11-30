@@ -49,6 +49,6 @@ type Category {
 type Question {
   title: String @SortBy
   text: String @SortBy
-  anwser: String
+  answer: String
   categories: [Category] @Join(field: questions)
 }

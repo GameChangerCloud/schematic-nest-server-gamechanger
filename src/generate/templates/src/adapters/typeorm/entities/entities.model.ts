@@ -68,6 +68,12 @@ function generateTypeOrmRelationsImportTemplate(type: Type): string {
           case 'oneToMany':
             relationshipsToImport.push('ManyToOne');
             break;
+          case 'oneToOneJoin':
+            relationshipsToImport.push('OneToOne');
+            break;
+          case 'manyToManyJoin':
+            relationshipsToImport.push('ManyToMany');
+            break;  
           default:
             relationshipsToImport.push(relationship.relation.charAt(0).toUpperCase() + relationship.relation.slice(1));
             break;
@@ -75,7 +81,7 @@ function generateTypeOrmRelationsImportTemplate(type: Type): string {
       }
     });
     relationshipsToImport = relationshipsToImport.filter((item, index) => relationshipsToImport.indexOf(item) === index);
-  return relationshipsToImport.join(',\n  ') + '\n';
+  return relationshipsToImport.join(',\n  ') + ',\n';
 }
 
 /**
@@ -91,17 +97,17 @@ function generateEntityRelationsModelImportsTemplate(
   let idImport = ``;
   let nodeId = true;
   types.forEach((type) => {
-    if (type.fields.find((field => field.type === "ID"))) {
+    if (type.fields.find((field => field.type === 'ID'))) {
       nodeId = false;
       idImport = `ID, `;
     }
   });
 
-  const idField = type.fields.find((field => field.type === "ID"));
+  const idField = type.fields.find((field => field.type === 'ID'));
   if (idField) {
     idImport = `ID, `;
     primaryColumnImport = `\n  PrimaryColumn, `;
-  } else if (!nodeId) primaryColumnImport = `\n  PrimaryGeneratedColumn, `;
+  } else if (!nodeId) primaryColumnImport = `\n  PrimaryGeneratedColumn,`;
 
   type.relationList.forEach(
     (relation: {
@@ -110,7 +116,7 @@ function generateEntityRelationsModelImportsTemplate(
     }) => {
       if (relation.type !== type.typeName) {
         let relatedType = types.find(type => type.typeName === relation.type);
-        let importType = relatedType?.type === "EnumTypeDefinition" ? 'enum' : 'model';
+        let importType = relatedType?.type === 'EnumTypeDefinition' ? 'enum' : 'model';
         entityRelationsModelImportsTemplate += `import { ${
           relation.type
         } } from './${strings.decamelize(relation.type)}.${importType}';\n`;
@@ -129,33 +135,33 @@ function generateEntityRelationsModelImportsTemplate(
 function generateEntityFieldsTemplate(types: Type[], type: Type): string {
   let entityFieldsTemplate = ``;
   let nodeId = true;
-  const idField = type.fields.find((field => field.type === "ID"));
-  if (idField) entityFieldsTemplate += `\n  @Field(() => ID)\n  @PrimaryColumn()\n  ${idField.name}: string\n`;
+  const idField = type.fields.find((field => field.type === 'ID'));
+  if (idField) entityFieldsTemplate += `\n  @Field(() => ID)\n  @PrimaryColumn()\n  id: string;\n`;
   types.forEach((type) => {
-    if (type.fields.find((field => field.type === "ID"))) nodeId = false;
+    if (type.fields.find((field => field.type === 'ID'))) nodeId = false;
   });
-  if (!nodeId && !idField) entityFieldsTemplate += `\n  @Field(() => ID)\n  @PrimaryGeneratedColumn('uuid')\n  id: string\n`;
+  if (!nodeId && !idField) entityFieldsTemplate += `\n  @Field(() => ID)\n  @PrimaryGeneratedColumn('uuid')\n  id: string;\n`;
 
 
   type.fields.forEach((field:any)=>{
-    if(field.type !== 'ID' && field.relationType !== "selfJoinMany"){
-    const arrayCharacter = field.isArray ? "[]" : "";
-    const nullOption = field.noNull ? "" : ", { nullable: true }";
-    const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "unique");
-    let uniqueOption = "";
+    if(field.type !== 'ID' && field.relationType !== 'selfJoinMany'){
+    const arrayCharacter = field.isArray ? '[]' : '';
+    const nullOption = field.noNull ? '' : ', { nullable: true }';
+    const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === 'unique');
+    let uniqueOption = '';
     if (uniqueDirective) {
-      uniqueOption = "\n    unique: true,\n";
+      uniqueOption = '\n    unique: true,\n';
     }
     
-    const nullColumn = field.noNull ? "" : "\n    nullable: true,\n";
-    const nullField = field.noNull ? "" : "?";
-    const nullType = field.noNull ? "" : " | null";
-    const enumOptions = field.isEnum ? `\n    type: 'enum',\n    enum: ${field.type},\n  `:``
-    const pluralFieldName = field.isArray ? "s" : "";
+    const nullColumn = field.noNull ? '' : '\n    nullable: true,\n';
+    const nullField = field.noNull ? '' : '?';
+    const nullType = field.noNull ? '' : ' | null';
+    const enumOptions = field.isEnum ? `\n    type: 'enum',\n    enum: ${field.type},\n`:``
+    const pluralFieldName = field.isArray ? 's' : '';
     const relation = type.relationList.find(relation => relation.type === field.type)
-    const relatedFieldName = relation ? relation.relatedFieldName : "";
-    // const pluralRelationName = field.isArray && field.relationType !== 'manyToOne' && field.name !== type.typeName ? "s" : "";
-    const singleRelation = field.relationType !== 'oneOnly' && field.relationType !== 'manyOnly' ? `, (${strings.decamelize(field.type)}) => ${strings.decamelize(field.type)}.${relatedFieldName},`: ","
+    const relatedFieldName = relation ? relation.relatedFieldName : '';
+    // const pluralRelationName = field.isArray && field.relationType !== 'manyToOne' && field.name !== type.typeName ? 's' : '';
+    const singleRelation = field.relationType !== 'oneOnly' && field.relationType !== 'manyOnly' ? `, (${strings.decamelize(field.type)}) => ${strings.decamelize(field.type)}.${relatedFieldName},`: ','
     const relationDeleteOption = `{\n    onDelete: 'SET NULL',\n  }`;
     let arrayBracketStart = '';
     let arrayBracketEnd = ''
@@ -171,7 +177,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     fieldTemplate += `\n  @${getTypeOrmRelation(field.relationType)}(() => ${strings.capitalize(field.type)}${singleRelation} ${relationDeleteOption})${getJoinInstructions(type, field, relatedFieldName)}
   ${field.name}: ${field.type}${arrayCharacter};\n
   @RelationId((self: ${type.typeName}) => self.${field.name})
-  readonly ${strings.camelize(field.name)}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n` 
+  readonly ${strings.camelize(pluralize(field.name, 1))}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n` 
     : 
     fieldTemplate += `\n  @Field(() => ${arrayBracketStart}${field.type}${nullOption}${arrayBracketEnd})
   @Column({${nullColumn + enumOptions + uniqueOption}  })
@@ -217,17 +223,17 @@ function getTypeOrmRelation(relation:'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'o
 
 function getJoinInstructions(type: Type, field: Field, relatedFieldName: string): string {
   let joinInstructions = ``;
-  if (field.relationType === 'oneToOneJoin') joinInstructions += `\n  @JoinColumn({\n    name: '${field.name}_id,'\n  })`;
+  if (field.relationType === 'oneToOneJoin') joinInstructions += `\n  @JoinColumn()`;
   if (field.relationType === 'manyToManyJoin') joinInstructions += 
 `\n  @JoinTable({
-    name: "${relatedFieldName}_${field.name}",
+    name: '${relatedFieldName}_${field.name}',
     joinColumn: {
-      name: "${strings.camelize(type.typeName)}",
-      referencedColumnName: "id",
+      name: '${strings.camelize(type.typeName)}',
+      referencedColumnName: 'id',
     },
     inverseJoinColumn: {
-      name: "${strings.camelize(field.type)}",
-      referencedColumnName: "id",
+      name: '${strings.camelize(field.type)}',
+      referencedColumnName: 'id',
     },
   })`;
   if (field.relationType === 'oneOnly' || field.relationType === 'manyOnly' || field.relationType === 'oneToMany' || field.relationType === 'manyToOne' || field.relationType === 'selfJoinOne' || field.relationType === 'selfJoinMany')

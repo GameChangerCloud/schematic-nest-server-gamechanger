@@ -139,11 +139,11 @@ import { ${relationship.type} } from 'adapters/typeorm/entities/${strings.cameli
 import { ${relationship.type}Service } from './${strings.camelize(relationship.type)}.service';`;
       }
         if (relationship.isArray) {
-          createRelationships += `\n  const mock${relationship.type} = new ${relationship.type}();`;
+          createRelationships += `\n    const mock${relationship.type} = new ${relationship.type}();`;
           if (relationship.type === type.typeName) {
             createRelationships += `
     ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))} = [mock${relationship.type}];
-    if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
+    if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids && input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
       for (let i = 0; i < input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length; i++) {
         const child${strings.capitalize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
           where: { id: input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i] },
@@ -166,7 +166,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
           } else {
             createRelationships += `
     ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)} = [mock${relationship.type}];
-    if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
+    if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids && input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
       for (let i = 0; i < input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length; i++) {
         const ${strings.camelize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(
           input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i],

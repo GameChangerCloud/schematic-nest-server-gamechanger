@@ -1,4 +1,4 @@
-import { Tree} from '@angular-devkit/schematics';
+import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 
 export function createNodeModel(
@@ -7,7 +7,7 @@ export function createNodeModel(
   projectName: string
 ) {
   let fileTemplate =
-`import { Field,${handleIdGeneration(types)[0]} InterfaceType } from '@nestjs/graphql';
+`import { Field, ${handleIdGeneration(types)[0]}InterfaceType } from '@nestjs/graphql';
 import {
   BaseEntity,
   CreateDateColumn,${handleIdGeneration(types)[1]}

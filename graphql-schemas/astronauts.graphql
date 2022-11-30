@@ -20,14 +20,13 @@ enum Role {
 }
 
 type User {
-  id: ID!
   username: String! @unique
   email: String! @unique
   roles: [Role]!
 }
 
 type Astronaut {
-  id: ID!
+  id: ID! @length(max: 10)
   firstname: String! @length(min: 3, max: 10)
   lastname: String! @length(min: 2)
   picture: String
