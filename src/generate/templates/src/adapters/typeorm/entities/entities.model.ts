@@ -18,7 +18,9 @@ export function createTypeOrmEntityFile(
   JoinColumn,
   JoinTable,
   ${generateTypeOrmRelationsImportTemplate(type)}} from 'typeorm';
-
+import {
+    Length,
+} from "class-validator"
 import { Field, ${generateEntityRelationsModelImportsTemplate(type, types)[1]}ObjectType } from '@nestjs/graphql';
 import { I${typeName} as ${typeName}Model } from 'domain/model/${strings.decamelize(
     typeName
@@ -146,7 +148,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
 
 
   type.fields.forEach((field:any)=>{
-    console.log('TYPE DIRECTIVES :',field.directives);
+    // console.log('TYPE DIRECTIVES :',field.directives);
     let deprecatedField = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "deprecated");
 
     if(field.type !== 'ID' && field.relationType !== "selfJoinMany" && !deprecatedField){
@@ -156,13 +158,20 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "unique");
     const longDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "long");
     const doubleDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "double");
+    const lengthDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "length");
 
     let uniqueOption = "";
     let longIntOption = ''
     let floatOption = ''
+    let lengthOption = ''
     longDirective ? longIntOption = 'type: "bigint"' : ''
     doubleDirective ? floatOption = 'type: "double"' : ''
     uniqueDirective ? uniqueOption = "\n    unique: true,\n": '';
+
+    if(lengthDirective){
+      console.log(lengthDirective.args.length,lengthOption);
+      lengthDirective.args.length === 2 ? lengthOption = `@Length(${lengthDirective.args[0].value}, ${lengthDirective.args[1].value})`: lengthOption = `@Length(${lengthDirective.args[0].value})`
+    }
     
     
     const nullColumn = field.noNull ? '' : '\n    nullable: true,\n';
@@ -186,7 +195,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     field.type === 'Int' || field.type === 'Float' ? field.type = 'Number': ''
     let fieldTemplate = ``
     let JSFieldType = field.isEnum ? field.type : field.type.toLowerCase();
-    
+
     field.relation && !field.isEnum ? 
     fieldTemplate += `\n  @${getTypeOrmRelation(field.relationType)}(() => ${strings.capitalize(field.type)}${singleRelation} ${relationDeleteOption})${getJoinInstructions(type, field, relatedFieldName)}
   ${field.name}: ${field.type}${arrayCharacter};\n
@@ -194,6 +203,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
   readonly ${strings.camelize(pluralize(field.name, 1))}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n` 
     : 
     fieldTemplate += `\n  @Field(() => ${arrayBracketStart}${field.type}${nullOption}${arrayBracketEnd})
+  ${lengthOption}
   @Column({${nullColumn + enumOptions + uniqueOption + longIntOption + floatOption}  })
   ${field.name}${nullField}: ${JSFieldType}${arrayCharacter};\n`
 
