@@ -2,6 +2,7 @@ import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
+const pluralize = require('pluralize');
 
 export function createDomainModelInterfaceFile(
   types: Type[],
@@ -60,13 +61,19 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
       const arrayCharacter = field.isArray ? '[]' : '';
       const plurals = field.isArray ? 's':''
       let interfacedField = ''
-      if(field.type !== 'String' && field.type !== 'Number' && field.type !== 'Boolean' && !field.isEnum && field.type !== 'ID' ) {
+      let TSfieldType = field.type;
+      if (field.type !== 'String' && !field.type.includes('Int') && field.type !== 'Float' && field.type !== 'ID' && field.type !== 'Boolean' && !field.relation) TSfieldType = 'String';
+      if (field.type.includes('Int') || field.type === 'Float') TSfieldType = "Number";
+      if(!field.isEnum && field.relation) {
         interfacedField = 'I';
-        template += `  ${strings.camelize(field.type)}Id${plurals}?: string${arrayCharacter};\n`;
+        if (field.relationType === 'selfJoinMany') template += `  child${strings.camelize(pluralize(field.name, 1))}Ids?: string[];\n  parent${strings.camelize(pluralize(field.name, 1))}Id?: string;\n`;
+        template += `  ${strings.camelize(pluralize(field.name, 1))}Id${plurals}?: string${arrayCharacter};\n`;
       }
       if(field.type !== 'ID'){
-        if (!field.relation) template += `  ${strings.camelize(field.name)}${nullField}: ${interfacedField}${strings.camelize(field.type)}${arrayCharacter};\n`;
-        else template += `  ${strings.camelize(field.name)}${nullField}: ${interfacedField}${field.type}${arrayCharacter};\n`;
+        if (!field.relation) template += `  ${strings.camelize(field.name)}${nullField}: ${interfacedField}${strings.camelize(TSfieldType)}${arrayCharacter};\n`;
+        else if (field.relationType === 'selfJoinMany') 
+          template += `  child${strings.capitalize(pluralize(field.name))}${nullField}: ${interfacedField}${TSfieldType}${arrayCharacter};\n  parent${strings.capitalize(pluralize(field.name, 1))}${nullField}: ${interfacedField}${TSfieldType};\n`;
+        else template += `  ${strings.camelize(field.name)}${nullField}: ${interfacedField}${TSfieldType}${arrayCharacter};\n`;
       }
     })    
   return template

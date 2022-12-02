@@ -60,7 +60,7 @@ function computeImportsTemplate(type: Type): string {
 function computeScalarsTemplate(type: Type): string[] {
   let stdScalarsTemplate = ``;
   if (type.fields.find((field: Field) => field.type === "ID")) stdScalarsTemplate += ``;
-  let validatorsToImportList: string[] = [];
+  let validatorsToImportFromDirective: string[] = [];
   const scalars = type.fields.filter(field => !field.relation && !field.isDeprecated && field.type !== "ID");
   scalars.forEach((scalar) => {
     let fieldDirective = '';
@@ -71,33 +71,31 @@ function computeScalarsTemplate(type: Type): string[] {
     switch(scalar.type) {
       case "String" :
         scalarTypeGQL = "String";
-        [fieldDirective, validatorsToImportList] = computeFieldDirective(scalar, scalar.type, validatorsToImportList);
+        [fieldDirective, validatorsToImportFromDirective] = computeFieldDirective(scalar, scalar.type, validatorsToImportFromDirective);
         break;
       case "Float" :
       case "Int" :
         scalarTypeGQL = "Number";
-        [fieldDirective, validatorsToImportList] = computeFieldDirective(scalar, scalar.type, validatorsToImportList);
+        [fieldDirective, validatorsToImportFromDirective] = computeFieldDirective(scalar, scalar.type, validatorsToImportFromDirective);
         break;
       case "Boolean" :
         scalarTypeGQL = "Boolean";
         break;
       default:
-        scalarTypeGQL = "Other"
+        scalarTypeGQL = "String";
     }
+    if (scalar.type.includes('Int')) scalarTypeGQL = "Number";
 
     const scalarTemplate = `  ${fieldDirective}@Field(() => ${scalarTypeGQL}${noNullOption})
   ${scalar.name}${noNullCharacter}: ${strings.camelize(scalarTypeGQL)}${arrayCharacter};\n\n`;
     stdScalarsTemplate += scalarTemplate;
   });
 
-  let validatorsToImportString = "";
   let validatorsImportTemplate = "";
-  if (validatorsToImportList.length > 0) {
-    for (let i = 0; i < validatorsToImportList.length; i++) {
-      if (i === validatorsToImportList.length - 1) validatorsToImportString += `${validatorsToImportList[i]}`;
-      else validatorsToImportString += `${validatorsToImportList[i]}, `;
-    }
-    validatorsImportTemplate = `\nimport { ${validatorsToImportString} } from 'class-validator';`;
+  let typeValidatorsToImport = classValidatorsImport(type);
+  if (validatorsToImportFromDirective.length > 0 || typeValidatorsToImport.length > 0) {
+    let totalValidators = validatorsToImportFromDirective.concat(typeValidatorsToImport);
+    validatorsImportTemplate = `\nimport { ${totalValidators.join(', ')} } from 'class-validator';\n`;
   }
   
 
@@ -136,20 +134,20 @@ function computeRelationshipsTemplate(type: Type): string {
 }
 
 function computeFieldDirective(scalar: Field, scalarType: string, validatorsToImport: string[]): [string, string[]] {
-  let directiveTemplate = '';
+  let directiveTemplate = getTypeValidators(scalar);
   if (scalarType === "String") {
     const lengthDirective = scalar.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "length");
     if (lengthDirective) {
       let minLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === "min");
       let maxLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === "max");
       if (minLength && maxLength) {
-        directiveTemplate = `@Length(${minLength.value}, ${maxLength.value})\n  `;
+        directiveTemplate += `@Length(${minLength.value}, ${maxLength.value})\n  `;
         if (!validatorsToImport.includes('Length')) validatorsToImport.push('Length');
       } else if (minLength && !maxLength) {
-        directiveTemplate = `@MinLength(${minLength.value})\n  `;
+        directiveTemplate += `@MinLength(${minLength.value})\n  `;
         if (!validatorsToImport.includes('MinLength')) validatorsToImport.push('MinLength');
       } else if (!minLength && maxLength) {
-        directiveTemplate = `@MaxLength(${maxLength.value})\n  `;
+        directiveTemplate += `@MaxLength(${maxLength.value})\n  `;
         if (!validatorsToImport.includes('MaxLength')) validatorsToImport.push('MaxLength');
       }
     }
@@ -171,4 +169,52 @@ function computeFieldDirective(scalar: Field, scalarType: string, validatorsToIm
     }
   }
   return [directiveTemplate, validatorsToImport]
+}
+
+function classValidatorsImport(type: Type): string[] {
+  let validators: string[] = [];
+  let supportedValidators = ['String', 'HSL', 'Boolean', 'Currency', 'PhoneNumber', 'PostalCode', 'JSON', 'ISBN', 'Port', 'Date']
+
+  type.fields
+    .forEach((field: Field) => { 
+      if (supportedValidators.includes(field.type) && !validators.includes(`Is${field.type}`)) validators.push(`Is${field.type}`);
+      else if (field.type.includes('Positive') && !field.type.includes('Non') && !validators.includes(`IsPositive`)) validators.push(`IsPositive`);
+      else if (field.type.includes('Negative') && !field.type.includes('Non') && !validators.includes(`IsNegative`)) validators.push(`IsNegative`);
+      else if (field.type.includes('Int') && !validators.includes(`IsInt`)) validators.push(`IsInt`);
+      else if (field.type.includes('IP') && !validators.includes(`IsIP`)) validators.push(`IsIP`);
+      else if (field.type === 'RGB' || field.type === 'RGBA' &&!validators.includes(`IsRgbColor`)) validators.push(`IsRgbColor`);
+      else if (field.type === 'HexColorCode' && !validators.includes(`IsHexColor`)) validators.push(`IsHexColor`);
+      else if (field.type === 'EmailAddress' && !validators.includes(`IsEmail`)) validators.push(`IsEmail`);
+      else if (field.type === 'MAC' && !validators.includes(`IsMACAddress`)) validators.push(`IsMACAddress`);
+      else if (field.type === 'URL' && !validators.includes(`IsUrl`)) validators.push(`IsUrl`);
+      else if (field.isEnum && !validators.includes(`IsEnum`))validators.push(`IsEnum`);
+    });
+
+  return validators;
+}
+
+function getTypeValidators(field: Field): string {
+  let typeValidators = ``;
+  if (field.type.includes('Positive') && !field.type.includes('Non')) typeValidators += '@IsPositive()\n  ';
+  if (field.type.includes('Negative') && !field.type.includes('Non')) typeValidators += '@IsNegative()\n  ';
+
+  if (field.type === 'EmailAddress') typeValidators += `@IsEmail()\n  `;
+  else if (field.isEnum) typeValidators += `@IsEnum(entity: ${field.type})\n  `;
+  else if (field.type.includes('IP')) typeValidators += `@IsIP(${field.type[3]})\n  `;
+  else if (field.type === 'MAC') typeValidators += `@IsMACAddress()\n  `;
+  else if (field.type === 'URL') typeValidators += `@IsUrl()\n  `;
+  else if (field.type === 'HSL') typeValidators += `@IsHSL()\n  `;
+  else if (field.type === 'RGB' || field.type === 'RGBA') typeValidators += `@IsRgbColor()\n  `;
+  else if (field.type === 'Port') typeValidators += `@IsPort()\n  `;
+  else if (field.type === 'ISBN') typeValidators += `@IsISBN()\n  `;
+  else if (field.type === 'JSON') typeValidators += `@IsJSON()\n  `;
+  else if (field.type === 'Currency') typeValidators += `@IsCurrency()\n  `;
+  else if (field.type === 'PostalCode') typeValidators += `@IsPostalCode()\n  `;
+  else if (field.type === 'PhoneNumber') typeValidators += `@IsPhoneNumber()\n  `;
+  else if (field.type === 'HexColorCode') typeValidators += `@IsHexColor()\n  `
+  else if (field.type === 'Boolean') typeValidators += `@IsBoolean()\n  `;
+  else if (field.type === 'Date') typeValidators += `@IsDate()\n  `;
+  else if (field.type === 'String' ) typeValidators += `@IsString()\n  `;
+  else if (field.type.includes('Int')) typeValidators += `@IsInt()\n  `;
+  return typeValidators;
 }

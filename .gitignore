@@ -21,3 +21,4 @@ yarn-error.log*
 
 # Generated project
 nest-server-gamechanger/
+nest-generate/

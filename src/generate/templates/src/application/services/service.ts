@@ -51,11 +51,11 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
   }
 
   async ${strings.camelize(type.typeName)}Update(
-    ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'],
+    id: ${type.typeName}['id'],
     input: ${type.typeName}UpdateInput,
   ): Promise<${type.typeName}UpdateOutput> {
     const ${strings.camelize(type.typeName)} = await this.${strings.camelize(type.typeName)}Repository.findOneOrFail({
-      where: { id: ${strings.camelize(type.typeName)}Id },
+      where: { id },
     });${updateFields}${updateRelationships}
     await ${strings.camelize(type.typeName)}.save();
     return { ${strings.camelize(type.typeName)} };
@@ -145,21 +145,25 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
     ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))} = [mock${relationship.type}];
     if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids && input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
       for (let i = 0; i < input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length; i++) {
-        const child${strings.capitalize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
-          where: { id: input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i] },
-        });
-        ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))}[i].id = child${strings.capitalize(relationship.type)}.id;
+        if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i] !== ${strings.camelize(type.typeName)}.id) {
+          const child${strings.capitalize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
+            where: { id: input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i] },
+          });
+          ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))}[i].id = child${strings.capitalize(relationship.type)}.id;
+        }
       }
     }`;
           updateRelationships +=`
     if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids) {
       const linked${strings.capitalize(relationship.name)}: ${relationship.type}[] = [];
       input.${strings.camelize(pluralize(relationship.name, 1))}Ids.forEach(async (${strings.camelize(pluralize(relationship.name, 1))}Id) => {
-        linked${strings.capitalize(relationship.name)}.push(
-          await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
-            where: { id: ${strings.camelize(pluralize(relationship.name, 1))}Id },
-          }),
-        );
+        if (${strings.camelize(pluralize(relationship.name, 1))}Id !== id) {
+          linked${strings.capitalize(relationship.name)}.push(
+            await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
+              where: { id: ${strings.camelize(pluralize(relationship.name, 1))}Id },
+            }),
+          );
+        }
       });
       ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))} = linked${strings.capitalize(relationship.name)};
     }`;
@@ -195,14 +199,14 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
     ${strings.camelize(type.typeName)}.${relationship.name} = new ${relationship.type}();`;
           if (relationship.type === type.typeName) {
             initRelationships += `
-    if (input.${relationship.name}Id) {
+    if (input.${relationship.name}Id && input.${relationship.name}Id !== ${strings.camelize(type.typeName)}.id) {
       const ${relationship.name} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
         where: { id: input.${relationship.name}Id },
       });
       ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
     }`;
           updateRelationships += `
-    if (input.${relationship.name}Id) {
+    if (input.${relationship.name}Id && input.${relationship.name}Id !== ${strings.camelize(type.typeName)}.id)) {
       ${strings.camelize(type.typeName)}.${relationship.name} = new ${relationship.type}();
       const ${relationship.name} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
         where: { id: input.${relationship.name}Id },

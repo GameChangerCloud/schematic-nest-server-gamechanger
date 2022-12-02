@@ -24,7 +24,7 @@ import { I${typeName} as ${typeName}Model } from 'domain/model/${strings.decamel
     typeName
   )}.interface';
 import { Node } from './node.model';
-${generateEntityRelationsModelImportsTemplate(type, types)[2]}
+${generateEntityRelationsModelImportsTemplate(type, types)[2]}${classValidatorsImport(type)}
 @Entity({ name: '${strings.decamelize(typeName)}' })
 @ObjectType()
 export class ${typeName} extends Node implements ${typeName}Model {${generateEntityFieldsTemplate(types, type)}
@@ -84,6 +84,29 @@ function generateTypeOrmRelationsImportTemplate(type: Type): string {
   return relationshipsToImport.join(',\n  ') + ',\n';
 }
 
+function classValidatorsImport(type: Type): string {
+  let validators: string[] = [];
+  let supportedValidators = ['String', 'HSL', 'Boolean', 'Currency', 'PhoneNumber', 'PostalCode', 'JSON', 'ISBN', 'Port', 'Date']
+  let importValidatorsTemplate = ``;
+
+  type.fields
+    .forEach((field: Field) => { 
+      if (supportedValidators.includes(field.type) && !validators.includes(`Is${field.type}`)) validators.push(`Is${field.type}`);
+      else if (field.type.includes('Positive') && !field.type.includes('Non') && !validators.includes(`IsPositive`)) validators.push(`IsPositive`);
+      else if (field.type.includes('Negative') && !field.type.includes('Non') && !validators.includes(`IsNegative`)) validators.push(`IsNegative`);
+      else if (field.type.includes('Int') && !validators.includes(`IsInt`)) validators.push(`IsInt`);
+      else if (field.type.includes('IP') && !validators.includes(`IsIP`)) validators.push(`IsIP`);
+      else if (field.type === 'RGB' || field.type === 'RGBA' &&!validators.includes(`IsRgbColor`)) validators.push(`IsRgbColor`);
+      else if (field.type === 'HexColorCode' && !validators.includes(`IsHexColor`)) validators.push(`IsHexColor`);
+      else if (field.type === 'EmailAddress' && !validators.includes(`IsEmail`)) validators.push(`IsEmail`);
+      else if (field.type === 'MAC' && !validators.includes(`IsMACAddress`)) validators.push(`IsMACAddress`);
+      else if (field.type === 'URL' && !validators.includes(`IsUrl`)) validators.push(`IsUrl`);
+      else if (field.isEnum && !validators.includes(`IsEnum`))validators.push(`IsEnum`);
+    });
+  if (validators.length > 0) importValidatorsTemplate = `\nimport { ${validators.join(', ')} } from 'class-validator';\n`;
+  return importValidatorsTemplate;
+}
+
 /**
  * @param type 
  * @returns typeORM models import from type relations
@@ -106,7 +129,7 @@ function generateEntityRelationsModelImportsTemplate(
   const idField = type.fields.find((field => field.type === 'ID'));
   if (idField) {
     idImport = `ID, `;
-    primaryColumnImport = `\n  PrimaryColumn, `;
+    primaryColumnImport = `\n  PrimaryColumn,`;
   } else if (!nodeId) primaryColumnImport = `\n  PrimaryGeneratedColumn,`;
 
   type.relationList.forEach(
@@ -143,7 +166,9 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
   if (!nodeId && !idField) entityFieldsTemplate += `\n  @Field(() => ID)\n  @PrimaryGeneratedColumn('uuid')\n  id: string;\n`;
 
 
-  type.fields.forEach((field:any)=>{
+  type.fields.forEach((field: Field)=>{
+    console.log(field);
+    let fieldType = field.type;
     if(field.type !== 'ID' && field.relationType !== 'selfJoinMany'){
     const arrayCharacter = field.isArray ? '[]' : '';
     const nullOption = field.noNull ? '' : ', { nullable: true }';
@@ -165,21 +190,23 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     const relationDeleteOption = `{\n    onDelete: 'SET NULL',\n  }`;
     let arrayBracketStart = '';
     let arrayBracketEnd = ''
-    if (field.isEnum && field.isArray) { 
+    if (field.isArray) { 
       arrayBracketStart = '[';
       arrayBracketEnd = ']';}
-    field.type === 'Int' ? field.type = 'Number': ''
+    if (field.type !== 'String' && field.type !== 'Int' && field.type !== 'Float' && field.type !== 'ID' && field.type !== 'Boolean' && !field.relation && !field.type.includes('Int')) fieldType = 'String'; 
+    field.type === 'Float' ? fieldType = 'Number': '';
+    field.type.includes('Int') ? fieldType = 'Number': '';
 
     let fieldTemplate = ``
 
-    let JSFieldType = field.isEnum ? field.type : field.type.toLowerCase();
+    let JSFieldType = field.isEnum ? fieldType : fieldType.toLowerCase();
     field.relation && !field.isEnum ? 
     fieldTemplate += `\n  @${getTypeOrmRelation(field.relationType)}(() => ${strings.capitalize(field.type)}${singleRelation} ${relationDeleteOption})${getJoinInstructions(type, field, relatedFieldName)}
   ${field.name}: ${field.type}${arrayCharacter};\n
   @RelationId((self: ${type.typeName}) => self.${field.name})
   readonly ${strings.camelize(pluralize(field.name, 1))}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n` 
     : 
-    fieldTemplate += `\n  @Field(() => ${arrayBracketStart}${field.type}${nullOption}${arrayBracketEnd})
+    fieldTemplate += `\n  ${getTypeValidators(field)}@Field(() => ${arrayBracketStart}${fieldType}${arrayBracketEnd}${nullOption})
   @Column({${nullColumn + enumOptions + uniqueOption}  })
   ${field.name}${nullField}: ${JSFieldType}${arrayCharacter};\n`
 
@@ -240,4 +267,30 @@ function getJoinInstructions(type: Type, field: Field, relatedFieldName: string)
     joinInstructions = `\n  @JoinColumn()`;
 
   return joinInstructions;
+}
+
+function getTypeValidators(field: Field): string {
+  let typeValidators = ``;
+  if (field.type.includes('Positive') && !field.type.includes('Non')) typeValidators += '@IsPositive()\n  ';
+  if (field.type.includes('Negative') && !field.type.includes('Non')) typeValidators += '@IsNegative()\n  ';
+
+  if (field.type === 'EmailAddress') typeValidators += `@IsEmail()\n  `;
+  else if (field.isEnum) typeValidators += `@IsEnum(${field.type})\n  `;
+  else if (field.type.includes('IP')) typeValidators += `@IsIP(${field.type[3]})\n  `;
+  else if (field.type === 'MAC') typeValidators += `@IsMACAddress()\n  `;
+  else if (field.type === 'URL') typeValidators += `@IsUrl()\n  `;
+  else if (field.type === 'HSL') typeValidators += `@IsHSL()\n  `;
+  else if (field.type === 'RGB' || field.type === 'RGBA') typeValidators += `@IsRgbColor()\n  `;
+  else if (field.type === 'Port') typeValidators += `@IsPort()\n  `;
+  else if (field.type === 'ISBN') typeValidators += `@IsISBN()\n  `;
+  else if (field.type === 'JSON') typeValidators += `@IsJSON()\n  `;
+  else if (field.type === 'Currency') typeValidators += `@IsCurrency()\n  `;
+  else if (field.type === 'PostalCode') typeValidators += `@IsPostalCode()\n  `;
+  else if (field.type === 'PhoneNumber') typeValidators += `@IsPhoneNumber()\n  `;
+  else if (field.type === 'HexColorCode') typeValidators += `@IsHexColor()\n  `
+  else if (field.type === 'Boolean') typeValidators += `@IsBoolean()\n  `;
+  else if (field.type === 'Date') typeValidators += `@IsDate()\n  `;
+  else if (field.type === 'String' ) typeValidators += `@IsString()\n  `;
+  else if (field.type.includes('Int')) typeValidators += `@IsInt()\n  `;
+  return typeValidators;
 }

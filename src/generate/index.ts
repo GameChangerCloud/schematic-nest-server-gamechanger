@@ -30,6 +30,10 @@ import { createNodeModel } from './templates/src/adapters/typeorm/entities/node.
 import { createDomainModelInterfaceFile } from './templates/src/domain/model/entities.model.interface';
 import { createDomainModelEnumFile } from './templates/src/domain/model/enum.model.interface';
 import { createNodeModelInterface } from './templates/src/domain/model/node.model.interface';
+import { createMain } from './templates/src/main';
+import { createYogaDriver } from './templates/src/graphql-yoga-driver';
+import { createCredentials } from './templates/src/credentials';
+import { createPagination } from './templates/src/application/services/dto/pagination.dto';
 const fs = require('fs');
 const path = require('path');
 
@@ -58,6 +62,7 @@ export function generate(_options: any): Rule {
      */
 
     let types = initTypes(_options.graphqlFile);
+    
 
     /**
      * NEST SERVER GENERATION
@@ -94,9 +99,13 @@ export function generate(_options: any): Rule {
       }
     })
 
+    createMain(_tree, _options.name);
+    createYogaDriver(_tree, _options.name);
+    createCredentials(_tree, _options.name);
     createAppModule(types, _tree, _options.name);
     createDatasource(types, _tree, _options.name);
     createNodeModel(types, _tree, _options.name);
+    createPagination(_tree, _options.name);
     createNodeModelInterface(types, _tree, _options.name);
 
     const templateSource = apply(url('./app'), [
@@ -124,7 +133,7 @@ export function generate(_options: any): Rule {
  */
  function initTypes(graphqlSchema: string) {
   const schemaCode = fs.readFileSync(
-    path.join(__dirname, '../../graphql-schemas/', graphqlSchema),
+    path.join(__dirname, '../../../../', graphqlSchema),
     'utf8'
   );
 

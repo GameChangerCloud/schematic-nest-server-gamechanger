@@ -27,7 +27,16 @@ That's it!
 
 ### Running
 
+To use generator, start of by installing the npm package in a repository which contains your graphql schema:
+
+```bash
+npm install schematic-nest-server-gamechanger@latest
+````
+
+Then use the following to generate projet
+
 To run generator, add your graphql schema in the graphql-schemas folder and run:
+
 ```bash
 schematics ./:generate --dry-run=false
 ```
