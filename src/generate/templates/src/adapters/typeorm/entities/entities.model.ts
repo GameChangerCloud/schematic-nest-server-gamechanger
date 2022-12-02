@@ -18,7 +18,9 @@ export function createTypeOrmEntityFile(
   JoinColumn,
   JoinTable,
   ${generateTypeOrmRelationsImportTemplate(type)}} from 'typeorm';
-
+import {
+    Length,
+} from "class-validator"
 import { Field, ${generateEntityRelationsModelImportsTemplate(type, types)[1]}ObjectType } from '@nestjs/graphql';
 import { I${typeName} as ${typeName}Model } from 'domain/model/${strings.decamelize(
     typeName
@@ -156,6 +158,8 @@ function generateEntityRelationsModelImportsTemplate(
  * @returns generate typeORM entities field for the given type
  */
 function generateEntityFieldsTemplate(types: Type[], type: Type): string {
+  
+  
   let entityFieldsTemplate = ``;
   let nodeId = true;
   const idField = type.fields.find((field => field.type === 'ID'));
@@ -167,16 +171,22 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
 
 
   type.fields.forEach((field: Field)=>{
-    console.log(field);
+
+    let deprecatedField = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "deprecated");
     let fieldType = field.type;
-    if(field.type !== 'ID' && field.relationType !== 'selfJoinMany'){
+    if(field.type !== 'ID' && field.relationType !== 'selfJoinMany' && !deprecatedField){
     const arrayCharacter = field.isArray ? '[]' : '';
     const nullOption = field.noNull ? '' : ', { nullable: true }';
     const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === 'unique');
+    const longDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "long");
+    const doubleDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "double");
+
     let uniqueOption = '';
-    if (uniqueDirective) {
-      uniqueOption = '\n    unique: true,\n';
-    }
+    let longIntOption = '';
+    let floatOption = '';
+    longDirective ? longIntOption = 'type: "bigint"' : ''
+    doubleDirective ? floatOption = 'type: "double"' : ''
+    uniqueDirective ? uniqueOption = "\n    unique: true,\n": '';
     
     const nullColumn = field.noNull ? '' : '\n    nullable: true,\n';
     const nullField = field.noNull ? '' : '?';
@@ -185,21 +195,21 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     const pluralFieldName = field.isArray ? 's' : '';
     const relation = type.relationList.find(relation => relation.type === field.type)
     const relatedFieldName = relation ? relation.relatedFieldName : '';
-    // const pluralRelationName = field.isArray && field.relationType !== 'manyToOne' && field.name !== type.typeName ? 's' : '';
     const singleRelation = field.relationType !== 'oneOnly' && field.relationType !== 'manyOnly' ? `, (${strings.decamelize(field.type)}) => ${strings.decamelize(field.type)}.${relatedFieldName},`: ','
     const relationDeleteOption = `{\n    onDelete: 'SET NULL',\n  }`;
     let arrayBracketStart = '';
     let arrayBracketEnd = ''
     if (field.isArray) { 
       arrayBracketStart = '[';
-      arrayBracketEnd = ']';}
+      arrayBracketEnd = ']';
+    }
     if (field.type !== 'String' && field.type !== 'Int' && field.type !== 'Float' && field.type !== 'ID' && field.type !== 'Boolean' && !field.relation && !field.type.includes('Int')) fieldType = 'String'; 
-    field.type === 'Float' ? fieldType = 'Number': '';
-    field.type.includes('Int') ? fieldType = 'Number': '';
+    field.type === 'Float' || field.type.includes('Int') ? fieldType = 'Number': '';
+    field.type === 'Float' ? floatOption = " type: 'numeric', precision: 10, scale: 2 " : '';
 
     let fieldTemplate = ``
-
     let JSFieldType = field.isEnum ? fieldType : fieldType.toLowerCase();
+
     field.relation && !field.isEnum ? 
     fieldTemplate += `\n  @${getTypeOrmRelation(field.relationType)}(() => ${strings.capitalize(field.type)}${singleRelation} ${relationDeleteOption})${getJoinInstructions(type, field, relatedFieldName)}
   ${field.name}: ${field.type}${arrayCharacter};\n
@@ -207,7 +217,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
   readonly ${strings.camelize(pluralize(field.name, 1))}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n` 
     : 
     fieldTemplate += `\n  ${getTypeValidators(field)}@Field(() => ${arrayBracketStart}${fieldType}${arrayBracketEnd}${nullOption})
-  @Column({${nullColumn + enumOptions + uniqueOption}  })
+  @Column({${nullColumn + enumOptions + uniqueOption + longIntOption + floatOption}  })
   ${field.name}${nullField}: ${JSFieldType}${arrayCharacter};\n`
 
     entityFieldsTemplate += fieldTemplate
