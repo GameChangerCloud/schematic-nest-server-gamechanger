@@ -10,10 +10,6 @@ Check the documentation with
 schematics --help
 ```
 
-### Unit Testing
-
-`npm run test` will run the unit tests, using Jasmine as a runner and test framework.
-
 ### Publishing
 
 To publish, simply do:
@@ -35,10 +31,10 @@ npm install schematic-nest-server-gamechanger@latest
 
 Then use the following to generate projet
 
-To run generator, add your graphql schema in the graphql-schemas folder and run:
+To run generator, add your graphql schema in the graphql-schemas folder and run the following inside the repo with the graphql schema:
 
 ```bash
-schematics ./:generate --dry-run=false
+schematics schematic-nest-server-gamechanger/:generate --dry-run=false
 ```
 
 You will then need to enter the name of the project you want to generate and the name and extension of the schema file as so :

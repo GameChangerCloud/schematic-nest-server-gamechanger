@@ -1,6 +1,6 @@
 {
   "name": "schematic-nest-server-gamechanger",
-  "version": "1.0.8",
+  "version": "1.0.11",
   "description": "Schematic to generate graphql API based on nest and TypeORM",
   "scripts": {
     "build:watch": "tsc -p tsconfig.json --watch",

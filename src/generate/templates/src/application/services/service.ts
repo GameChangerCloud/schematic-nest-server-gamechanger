@@ -111,7 +111,7 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
 
 function computeFieldTemplate(type: Type): string {
   let updateFields = '';
-  const scalarAndEnumFields = type.fields.filter((field: Field) => field.type !== "ID" && (!field.relation || field.isEnum));
+  const scalarAndEnumFields = type.fields.filter((field: Field) => field.type !== "ID" && !field.isDeprecated &&(!field.relation || field.isEnum));
   if (scalarAndEnumFields.length > 0) {
     scalarAndEnumFields.forEach((field) => {
         updateFields += `

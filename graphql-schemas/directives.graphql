@@ -24,7 +24,7 @@ type User {
   pseudo: String! @length(min: 3)
   game_pseudo: String @deprecated
   age: Int @long
-  sub_age: Int @float
+  sub_age: Int
   profile: Profile @Join(field: user)
 }
 

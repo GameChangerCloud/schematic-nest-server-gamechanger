@@ -18,9 +18,6 @@ export function createTypeOrmEntityFile(
   JoinColumn,
   JoinTable,
   ${generateTypeOrmRelationsImportTemplate(type)}} from 'typeorm';
-import {
-    Length,
-} from "class-validator"
 import { Field, ${generateEntityRelationsModelImportsTemplate(type, types)[1]}ObjectType } from '@nestjs/graphql';
 import { I${typeName} as ${typeName}Model } from 'domain/model/${strings.decamelize(
     typeName
@@ -184,8 +181,8 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     let uniqueOption = '';
     let longIntOption = '';
     let floatOption = '';
-    longDirective ? longIntOption = 'type: "bigint"' : ''
-    doubleDirective ? floatOption = 'type: "double"' : ''
+    longDirective ? longIntOption = '    type: "bigint"\n' : ''
+    doubleDirective ? floatOption = '    type: "double"\n' : ''
     uniqueDirective ? uniqueOption = "\n    unique: true,\n": '';
     
     const nullColumn = field.noNull ? '' : '\n    nullable: true,\n';
@@ -205,7 +202,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     }
     if (field.type !== 'String' && field.type !== 'Int' && field.type !== 'Float' && field.type !== 'ID' && field.type !== 'Boolean' && !field.relation && !field.type.includes('Int')) fieldType = 'String'; 
     field.type === 'Float' || field.type.includes('Int') ? fieldType = 'Number': '';
-    field.type === 'Float' ? floatOption = " type: 'numeric', precision: 10, scale: 2 " : '';
+    field.type === 'Float' ? floatOption = "    type: 'numeric',\n    precision: 10,\n    scale: 2,\n" : '';
 
     let fieldTemplate = ``
     let JSFieldType = field.isEnum ? fieldType : fieldType.toLowerCase();
