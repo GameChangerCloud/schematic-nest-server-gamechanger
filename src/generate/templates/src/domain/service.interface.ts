@@ -1,7 +1,7 @@
 import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
-const pluralize = require("pluralize");
+const pluralize = require('pluralize');
 
 export function createServiceInterface(
     type: Type,
@@ -55,7 +55,7 @@ function computeFieldPagination(type: Type): string[] {
   let fieldPagination = '';
   let importPaginationArgs = '';
   let importFieldPagination = '';
-  const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.isArray && field.relationType !== "selfJoinMany");
+  const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.isArray && field.relationType !== 'selfJoinMany');
   if(relatedFields.length > 0) {
     relatedFields.forEach((relatedField) => {
       fieldPagination += `

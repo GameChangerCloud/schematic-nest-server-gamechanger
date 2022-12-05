@@ -53,10 +53,10 @@ function handleIdField(type: Type): string[] {
 function computeFieldDirective(scalar: Field): [string, string[]] {
   let directiveTemplate = '';
   let validatorsToImport: string[] = [];
-  const lengthDirective = scalar.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "length");
+  const lengthDirective = scalar.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === 'length');
   if (lengthDirective) {
-    let minLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === "min");
-    let maxLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === "max");
+    let minLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === 'min');
+    let maxLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === 'max');
     if (minLength && maxLength) {
       directiveTemplate = `@Length(${minLength.value}, ${maxLength.value})\n  `;
       if (!validatorsToImport.includes('Length')) validatorsToImport.push('Length');

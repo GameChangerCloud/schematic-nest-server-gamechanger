@@ -2,7 +2,7 @@ import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
-const pluralize = require("pluralize");
+const pluralize = require('pluralize');
 
 export function createService(
   types: Type[],
@@ -111,7 +111,7 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
 
 function computeFieldTemplate(type: Type): string {
   let updateFields = '';
-  const scalarAndEnumFields = type.fields.filter((field: Field) => field.type !== "ID" && !field.isDeprecated &&(!field.relation || field.isEnum));
+  const scalarAndEnumFields = type.fields.filter((field: Field) => field.type !== 'ID' && !field.isDeprecated &&(!field.relation || field.isEnum));
   if (scalarAndEnumFields.length > 0) {
     scalarAndEnumFields.forEach((field) => {
         updateFields += `
@@ -123,11 +123,11 @@ function computeFieldTemplate(type: Type): string {
 
 function computeRelationshipsTemplates(type: Type): string[] {
 let [forwardRefAndInjectImport, forwardReferencedServices, referencedServices] = computeForwardRelationships(type);
-  let modelsAndServices = "";
-  let createRelationships = "";
-  let initRelationships = "";
-  let updateRelationships = "";
-  let relatedRepositoryImport = "";
+  let modelsAndServices = '';
+  let createRelationships = '';
+  let initRelationships = '';
+  let updateRelationships = '';
+  let relatedRepositoryImport = '';
 
   const relationships = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated);
   if (relationships.length > 0) {
@@ -242,7 +242,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
 }
 
 function computeForwardRelationships(type: Type): string[] {
-    const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.relationType !== "selfJoinOne" && field.relationType !== "selfJoinMany");
+    const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.relationType !== 'selfJoinOne' && field.relationType !== 'selfJoinMany');
     let forwardRelationshipImport = '';
     let forwardReferencedServices = '';
     let referencedServices = '';
@@ -264,9 +264,9 @@ function computeForwardRelationships(type: Type): string[] {
 }
 
 function computePaginationTemplates(types: Type[], type: Type): string[] {
-  let paginationArgsImport = "";
-  let fieldPaginationImport = "";
-  let fieldPaginationMethod = "";
+  let paginationArgsImport = '';
+  let fieldPaginationImport = '';
+  let fieldPaginationMethod = '';
   const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.isArray);
   if (relatedFields.length > 0) {
     paginationArgsImport = 'PaginationArgs, ';
@@ -274,7 +274,7 @@ function computePaginationTemplates(types: Type[], type: Type): string[] {
       const relatedType = types.find((type) => type.typeName === relatedField.type);
       if (relatedType){
         let fieldInRelatedTypeName = relatedType.fields.find((field) => field.type === type.typeName)?.name;
-        if (relatedField.relationType === "selfJoinMany") fieldInRelatedTypeName = `parent${strings.capitalize(pluralize(relatedField.name, 1))}`;
+        if (relatedField.relationType === 'selfJoinMany') fieldInRelatedTypeName = `parent${strings.capitalize(pluralize(relatedField.name, 1))}`;
         if (fieldInRelatedTypeName) {
           fieldPaginationImport += `
 import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } from './dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-${strings.camelize(relatedField.name)}-pagination.dto';`;
@@ -310,9 +310,9 @@ import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } fr
 }
 
 function handleSortingInstructions(type: Type): string {
-  let sortingInstructions = "";
+  let sortingInstructions = '';
   type.fields.forEach((field) => {
-    if(field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "SortBy"))
+    if(field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === 'SortBy'))
     sortingInstructions += `\n      if (args.sortBy.${field.name} !== null) {
         queryBuilder.addOrderBy(
           '${strings.camelize(type.typeName)}.${field.name}',

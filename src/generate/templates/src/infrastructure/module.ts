@@ -48,11 +48,11 @@ export class ${type.typeName}Module {}
 function computeRelationalTemplates(type: Type): string[] {
     const relationalFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated);
     let [forwardRefImport, forwardReferencedModules, referencedModules] = computeForwardReferences(type, relationalFields);
-    let entitiesImport = "";
-    let fieldResolverImport = "";
-    let entitiesModulesImport = "";
-    let typeOmrRelatedEntities = "";
-    let fieldsResolver = "";
+    let entitiesImport = '';
+    let fieldResolverImport = '';
+    let entitiesModulesImport = '';
+    let typeOmrRelatedEntities = '';
+    let fieldsResolver = '';
     if(relationalFields.length > 0) {
         fieldResolverImport = `
 import { ${type.typeName}FieldsResolver } from 'infrastructure/resolvers/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}.fields.resolver';`;

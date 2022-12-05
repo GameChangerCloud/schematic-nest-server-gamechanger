@@ -1,7 +1,7 @@
 import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
-const pluralize = require("pluralize");
+const pluralize = require('pluralize');
 
 export function createMutationsResolver(
   type: Type,

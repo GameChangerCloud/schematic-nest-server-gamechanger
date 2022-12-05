@@ -2,7 +2,7 @@ import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
 import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
-const pluralize = require("pluralize");
+const pluralize = require('pluralize');
 
 export function createUpdateDto(
     type: Type,
@@ -59,39 +59,40 @@ function computeImportsTemplate(type: Type): string {
 
 function computeScalarsTemplate(type: Type): string[] {
   let stdScalarsTemplate = ``;
-  if (type.fields.find((field: Field) => field.type === "ID")) stdScalarsTemplate += ``;
+  if (type.fields.find((field: Field) => field.type === 'ID')) stdScalarsTemplate += ``;
   let validatorsToImportFromDirective: string[] = [];
-  const scalars = type.fields.filter(field => !field.relation && !field.isDeprecated && field.type !== "ID");
+  const scalars = type.fields.filter(field => !field.relation && !field.isDeprecated && field.type !== 'ID');
   scalars.forEach((scalar) => {
     let fieldDirective = '';
-    const arrayCharacter = scalar.isArray ? "[]" : "";
-    const noNullOption = scalar.noNull ? "" : ", { nullable: true }";
-    const noNullCharacter = scalar.noNull ? "" : "?";
+    const arrayCharacter = scalar.isArray ? '[]' : '';
+    const noNullOption = scalar.noNull ? '' : ', { nullable: true }';
+    const noNullCharacter = scalar.noNull ? '' : '?';
     let scalarTypeGQL: string;
+    [fieldDirective, validatorsToImportFromDirective] = computeFieldDirective(scalar, scalar.type, validatorsToImportFromDirective);
     switch(scalar.type) {
-      case "String" :
-        scalarTypeGQL = "String";
-        [fieldDirective, validatorsToImportFromDirective] = computeFieldDirective(scalar, scalar.type, validatorsToImportFromDirective);
+      case 'String' :
+        scalarTypeGQL = 'String';
+        //[fieldDirective, validatorsToImportFromDirective] = computeFieldDirective(scalar, scalar.type, validatorsToImportFromDirective);
         break;
-      case "Float" :
-      case "Int" :
-        scalarTypeGQL = "Number";
-        [fieldDirective, validatorsToImportFromDirective] = computeFieldDirective(scalar, scalar.type, validatorsToImportFromDirective);
+      case 'Float' :
+      case 'Int' :
+        scalarTypeGQL = 'Number';
+        //[fieldDirective, validatorsToImportFromDirective] = computeFieldDirective(scalar, scalar.type, validatorsToImportFromDirective);
         break;
-      case "Boolean" :
-        scalarTypeGQL = "Boolean";
+      case 'Boolean' :
+        scalarTypeGQL = 'Boolean';
         break;
       default:
-        scalarTypeGQL = "String";
+        scalarTypeGQL = 'String';
     }
-    if (scalar.type.includes('Int')) scalarTypeGQL = "Number";
+    if (scalar.type.includes('Int')) scalarTypeGQL = 'Number';
 
     const scalarTemplate = `  ${fieldDirective}@Field(() => ${scalarTypeGQL}${noNullOption})
   ${scalar.name}${noNullCharacter}: ${strings.camelize(scalarTypeGQL)}${arrayCharacter};\n\n`;
     stdScalarsTemplate += scalarTemplate;
   });
 
-  let validatorsImportTemplate = "";
+  let validatorsImportTemplate = '';
   let typeValidatorsToImport = classValidatorsImport(type);
   if (validatorsToImportFromDirective.length > 0 || typeValidatorsToImport.length > 0) {
     let totalValidators = validatorsToImportFromDirective.concat(typeValidatorsToImport);
@@ -135,11 +136,12 @@ function computeRelationshipsTemplate(type: Type): string {
 
 function computeFieldDirective(scalar: Field, scalarType: string, validatorsToImport: string[]): [string, string[]] {
   let directiveTemplate = getTypeValidators(scalar);
-  if (scalarType === "String") {
-    const lengthDirective = scalar.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "length");
+  console.log()
+  if (scalarType === 'String') {
+    const lengthDirective = scalar.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === 'length');
     if (lengthDirective) {
-      let minLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === "min");
-      let maxLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === "max");
+      let minLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === 'min');
+      let maxLength = lengthDirective.args.find((arg: { name: string, value: string }) => arg.name === 'max');
       if (minLength && maxLength) {
         directiveTemplate += `@Length(${minLength.value}, ${maxLength.value})\n  `;
         if (!validatorsToImport.includes('Length')) validatorsToImport.push('Length');
@@ -153,11 +155,11 @@ function computeFieldDirective(scalar: Field, scalarType: string, validatorsToIm
     }
   }
 
-  if (scalarType === "Int") {
-    const rangeDirective = scalar.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "length");
+  if (scalarType === 'Int') {
+    const rangeDirective = scalar.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === 'length');
     if (rangeDirective) {
-      let minValue = rangeDirective.args.find((arg: { name: string, value: string }) => arg.name === "min");
-      let maxValue = rangeDirective.args.find((arg: { name: string, value: string }) => arg.name === "max");
+      let minValue = rangeDirective.args.find((arg: { name: string, value: string }) => arg.name === 'min');
+      let maxValue = rangeDirective.args.find((arg: { name: string, value: string }) => arg.name === 'max');
       if (minValue) {
         directiveTemplate += `@Min(${minValue.value})\n  `;
         if (!validatorsToImport.includes('Min')) validatorsToImport.push('Min');

@@ -25,7 +25,7 @@ function generateEntityFieldsTemplate(types: Type[]): string {
     let idDefinition = '';
     let nodeId = true;
     types.forEach((type) => {
-      if (type.fields.find((field: Field) => field.type === "ID")) nodeId = false;
+      if (type.fields.find((field: Field) => field.type === 'ID')) nodeId = false;
     });
     if (nodeId) idDefinition = `\n  id: string`;   
   return idDefinition;

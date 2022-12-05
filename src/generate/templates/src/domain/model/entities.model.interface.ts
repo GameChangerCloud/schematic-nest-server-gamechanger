@@ -63,7 +63,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
       let interfacedField = ''
       let TSfieldType = field.type;
       if (field.type !== 'String' && !field.type.includes('Int') && field.type !== 'Float' && field.type !== 'ID' && field.type !== 'Boolean' && !field.relation) TSfieldType = 'String';
-      if (field.type.includes('Int') || field.type === 'Float') TSfieldType = "Number";
+      if (field.type.includes('Int') || field.type === 'Float') TSfieldType = 'Number';
       if(!field.isEnum && field.relation) {
         interfacedField = 'I';
         if (field.relationType === 'selfJoinMany') template += `  child${strings.camelize(pluralize(field.name, 1))}Ids?: string[];\n  parent${strings.camelize(pluralize(field.name, 1))}Id?: string;\n`;

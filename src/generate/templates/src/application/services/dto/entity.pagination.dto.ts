@@ -1,7 +1,7 @@
 import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
 import { Type } from 'easygraphql-parser-gamechanger';
-const pluralize = require("pluralize");
+const pluralize = require('pluralize');
 
 export function createEntityPaginationDto(
     type: Type,
@@ -44,9 +44,9 @@ export class ${pluralize(type.typeName)}Pagination extends Pagination {
 }
 
 function handleSortingArguments(type: Type): string {
-  let sortingArgs = "";
+  let sortingArgs = '';
   type.fields.forEach((field) => {
-    if(field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === "SortBy"))
+    if(field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === 'SortBy'))
     sortingArgs += `\n  @Field(() => SortDirection, { nullable: true })\n  ${strings.camelize(field.name)}?: SortDirection;\n`;
   });
   return sortingArgs;

@@ -38,7 +38,7 @@ function handleIdGeneration(types: Type[]): string[] {
   let importPrimaryGeneratedColumn = '';
   let primaryGeneratedColumn = '';
   types.forEach((type) => {
-    if (type.fields.find((field => field.type === "ID"))) typesHaveIDs = true;
+    if (type.fields.find((field => field.type === 'ID'))) typesHaveIDs = true;
   })
   if (!typesHaveIDs) {
     importID = 'ID, ';

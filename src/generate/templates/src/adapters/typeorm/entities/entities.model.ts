@@ -169,21 +169,21 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
 
   type.fields.forEach((field: Field)=>{
 
-    let deprecatedField = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "deprecated");
+    let deprecatedField = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === 'deprecated');
     let fieldType = field.type;
     if(field.type !== 'ID' && field.relationType !== 'selfJoinMany' && !deprecatedField){
     const arrayCharacter = field.isArray ? '[]' : '';
     const nullOption = field.noNull ? '' : ', { nullable: true }';
     const uniqueDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === 'unique');
-    const longDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "long");
-    const doubleDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === "double");
+    const longDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === 'long');
+    const doubleDirective = field.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name.toLocaleLowerCase() === 'double');
 
     let uniqueOption = '';
     let longIntOption = '';
     let floatOption = '';
-    longDirective ? longIntOption = '    type: "bigint"\n' : ''
-    doubleDirective ? floatOption = '    type: "double"\n' : ''
-    uniqueDirective ? uniqueOption = "\n    unique: true,\n": '';
+    longDirective ? longIntOption = '    type: \'bigint\',\n' : ''
+    doubleDirective ? floatOption = '    type: \'double\',\n' : ''
+    uniqueDirective ? uniqueOption = '\n    unique: true,\n': '';
     
     const nullColumn = field.noNull ? '' : '\n    nullable: true,\n';
     const nullField = field.noNull ? '' : '?';
@@ -202,7 +202,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
     }
     if (field.type !== 'String' && field.type !== 'Int' && field.type !== 'Float' && field.type !== 'ID' && field.type !== 'Boolean' && !field.relation && !field.type.includes('Int')) fieldType = 'String'; 
     field.type === 'Float' || field.type.includes('Int') ? fieldType = 'Number': '';
-    field.type === 'Float' ? floatOption = "    type: 'numeric',\n    precision: 10,\n    scale: 2,\n" : '';
+    field.type === 'Float' ? floatOption = '    type: \'numeric\',\n    precision: 10,\n    scale: 2,\n' : '';
 
     let fieldTemplate = ``
     let JSFieldType = field.isEnum ? fieldType : fieldType.toLowerCase();

@@ -26,10 +26,10 @@ function generateEnumFileTemplate(type:Type): string{
 type.values.forEach((value:string)=>{
   enumListTemplate += `  ${value} = '${value.toLocaleLowerCase()}',\n`
 })
-  let entitieEnumListTemplate = 
+  let entityEnumListTemplate = 
 `export enum ${typeName} {
 ${enumListTemplate}}`
 
-  return entitieEnumListTemplate
+  return entityEnumListTemplate
 }
 

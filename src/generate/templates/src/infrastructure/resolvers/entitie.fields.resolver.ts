@@ -11,11 +11,11 @@ export function createResolverFields(
 
   let typeName = type.typeName
   
-  let entitieFieldsResolvertemplate = 
+  let entityFieldsResolvertemplate = 
 `import { Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.decamelize(type.typeName)}.model';
 ${generateRelationsModelImports(type)}
-${generateEntitieResolverRelationsServicesImport(type)}
+${generateEntityResolverRelationsServicesImport(type)}
 
 
  
@@ -31,7 +31,7 @@ export class ${typeName}FieldsResolver {
   // Create Service file
   _tree.create(
     `${projectName}/src/infrastructure/resolvers/${strings.decamelize(type.typeName)}/${strings.decamelize(type.typeName)}.fields.resolver.ts`,
-    entitieFieldsResolvertemplate
+    entityFieldsResolvertemplate
   );
 }
 
@@ -43,7 +43,7 @@ import { User } from 'adapters/typeorm/entities/user.model';`
   return template
 }
 
-function generateEntitieResolverRelationsServicesImport(type: Type): string {
+function generateEntityResolverRelationsServicesImport(type: Type): string {
   let template =
 `import { PlanetService } from 'application/services/planet.service';
 import { UserService } from 'application/services/user.service';`
