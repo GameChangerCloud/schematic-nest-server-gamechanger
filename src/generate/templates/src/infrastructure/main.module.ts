@@ -31,21 +31,43 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
     ConfigModule.forRoot(),
     GraphQLModule.forRoot({
       driver: GraphQLYogaDriver,
-      autoSchemaFile: 'schema.gql',
+      autoSchemaFile: () => {
+        if (process.env.SECRETARN) {
+          return join(__dirname, '../schema.gql')
+        } else {
+          return join(__dirname, 'schema.gql')
+        }
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: () => ({
-        type: 'postgres',
-        host: Constants.DATABASE_HOST,
-        port: Constants.DATABASE_PORT,
-        username: Constants.DATABASE_USER,
-        password: Constants.DATABASE_PASSWORD,
-        database: Constants.DATABASE_DB,
-        entities: [join(__dirname, '**', '*.model.{ts,js}')],
-        synchronize: true,
-      }),
+      useFactory: () => {
+        if (process.env.SECRETARN) {
+          return (
+            {
+            "type": 'aurora-postgres',
+            "database": process.env.DATABASE,
+            "secretArn": process.env.SECRETARN,
+            "resourceArn": process.env.RESOURCEARN,
+            "region": "eu-west-1",
+            "entities": [join(__dirname, '**', '*.model.{ts,js}')],
+            "synchronize": true,
+            "logging": true,
+            })
+        } else {
+          return (
+            {
+              "type": 'postgres',
+              "host": Constants.DATABASE_HOST,
+              "port": Constants.DATABASE_PORT,
+              "username": Constants.DATABASE_USER,
+              "password": Constants.DATABASE_PASSWORD,
+              "database": Constants.DATABASE_DB,
+              "entities": [join(__dirname, '**', '*.model.{ts,js}')],
+              "synchronize": true,
+              "logging": true,
+            })
     }),${entitiesModules}
   ],
 })
