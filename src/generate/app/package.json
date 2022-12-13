@@ -53,6 +53,7 @@
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
     "@types/aws-lambda": "^8.10.101",
+    "aws-sdk": "^2.1272.0",
     "class-validator": "^0.13.2",
     "graphql": "^16.6.0",
     "graphql-yoga": "^3.0.1",
@@ -60,6 +61,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.7",
     "source-map-support": "^0.5.20",
-    "typeorm": "0.3.6"
+    "typeorm": "0.3.6",
+    "typeorm-aurora-data-api-driver": "^2.4.4"
   }
 }

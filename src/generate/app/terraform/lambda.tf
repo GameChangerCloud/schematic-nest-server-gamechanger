@@ -17,11 +17,12 @@ data "archive_file" "init" {
 resource "aws_lambda_function" "lambda" {
   source_code_hash = data.archive_file.init.output_base64sha256
   function_name    = var.lambda_name
-  description      = "Lamdba for  testing"
+  description      = "Nest Gamechanger Lamdba"
   role             = aws_iam_role.instance.arn
   filename         = data.archive_file.init.output_path
-  handler          = "index.handler"
-  runtime          = "nodejs14.x"
+  handler          = "dist/index.lambdaHandler"
+  runtime          = "nodejs18.x"
+  memory_size      = 256
   timeout          = 60
   environment {
     variables = {
