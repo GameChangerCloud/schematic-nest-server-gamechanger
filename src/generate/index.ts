@@ -20,7 +20,7 @@ import { createModule } from './templates/src/infrastructure/module';
 import { createServiceInterface } from './templates/src/domain/service.interface';
 import { createTypeOrmEntityFile } from './templates/src/adapters/typeorm/entities/entities.model';
 import { createTypeOrmEnumFile } from './templates/src/adapters/typeorm/entities/enum.model';
-import { createAppModule } from './templates/src/infrastructure/main.module';
+import { createAppModule } from './templates/src/infrastructure/app.module';
 import { createMutationsResolver } from './templates/src/infrastructure/resolvers/mutations.resolver';
 import { createFieldsResolver } from './templates/src/infrastructure/resolvers/fields.resolver';
 import { createQueriesResolver } from './templates/src/infrastructure/resolvers/queries.resolver';
@@ -34,6 +34,7 @@ import { createMain } from './templates/src/main';
 import { createYogaDriver } from './templates/src/graphql-yoga-driver';
 import { createCredentials } from './templates/src/credentials';
 import { createPagination } from './templates/src/application/services/dto/pagination.dto';
+import { createIndex } from './templates/src/index';
 const fs = require('fs');
 const path = require('path');
 
@@ -100,6 +101,7 @@ export function generate(_options: any): Rule {
     })
 
     createMain(_tree, _options.name);
+    createIndex(_tree, _options.name);
     createYogaDriver(_tree, _options.name);
     createCredentials(_tree, _options.name);
     createAppModule(types, _tree, _options.name);
