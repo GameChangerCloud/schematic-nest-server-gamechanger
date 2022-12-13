@@ -44,30 +44,32 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
       inject: [ConfigService],
       useFactory: () => {
         if (process.env.SECRETARN) {
-          return (
-            {
-            "type": 'aurora-postgres',
-            "database": process.env.DATABASE,
-            "secretArn": process.env.SECRETARN,
-            "resourceArn": process.env.RESOURCEARN,
-            "region": "eu-west-1",
-            "entities": [join(__dirname, '**', '*.model.{ts,js}')],
-            "synchronize": true,
-            "logging": true,
-            })
+          return {
+            type: 'aurora-postgres',
+            database: process.env.DATABASE,
+            secretArn: process.env.SECRETARN,
+            resourceArn: process.env.RESOURCEARN,
+            region: 'eu-west-1',
+            entities: [join(__dirname, '**', '*.model.{ts,js}')],
+            synchronize: true,
+            logging: true,
+            playground: false,
+          };
         } else {
-          return (
-            {
-              "type": 'postgres',
-              "host": Constants.DATABASE_HOST,
-              "port": Constants.DATABASE_PORT,
-              "username": Constants.DATABASE_USER,
-              "password": Constants.DATABASE_PASSWORD,
-              "database": Constants.DATABASE_DB,
-              "entities": [join(__dirname, '**', '*.model.{ts,js}')],
-              "synchronize": true,
-              "logging": true,
-            })
+          return {
+            type: 'postgres',
+            host: Constants.DATABASE_HOST,
+            port: Constants.DATABASE_PORT,
+            username: Constants.DATABASE_USER,
+            password: Constants.DATABASE_PASSWORD,
+            database: Constants.DATABASE_DB,
+            entities: [join(__dirname, '**', '*.model.{ts,js}')],
+            synchronize: true,
+            logging: true,
+            debug: true,
+          };
+        }
+      },
     }),${entitiesModules}
   ],
 })
