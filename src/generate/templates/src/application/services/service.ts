@@ -175,7 +175,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
         const ${strings.camelize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(
           input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i],
         );
-        ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)}[i].id = ${strings.camelize(relationship.type)}.id;
+        ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)}[i].id = ${strings.camelize(pluralize(relationship.name, 1))}.id;
       }
     }`;
           updateRelationships +=`
