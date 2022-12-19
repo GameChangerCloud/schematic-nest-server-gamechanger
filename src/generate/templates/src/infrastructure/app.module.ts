@@ -33,9 +33,9 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
       driver: GraphQLYogaDriver,
       autoSchemaFile: () => {
         if (process.env.SECRETARN) {
-          return join(__dirname, '../schema.gql')
+          return join(__dirname, '../schema.gql');
         } else {
-          return join(__dirname, 'schema.gql')
+          return join(__dirname, 'schema.gql');
         }
       },
     }),
@@ -51,7 +51,7 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
             resourceArn: process.env.RESOURCEARN,
             region: 'eu-west-1',
             entities: [join(__dirname, '**', '*.model.{ts,js}')],
-            synchronize: true,
+            synchronize: false,
             logging: true,
             playground: false,
           };

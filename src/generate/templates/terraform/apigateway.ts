@@ -1,6 +1,16 @@
-resource "aws_api_gateway_rest_api" "myAPI" {
+import { Tree } from '@angular-devkit/schematics';
+const path = require('path');
+
+export function createApiGateway(
+    _tree: Tree,
+    projectName: string,
+    graphqlFileName: string,
+) {
+    const graphqlName = path.parse(graphqlFileName).name;
+    let fileTemplate = 
+`resource "aws_api_gateway_rest_api" "myAPI" {
   name        = var.api_name
-  description = "This is my API for moviesdir project"
+  description = "This is my API for the ${graphqlName} project"
 }
 
 resource "aws_api_gateway_resource" "myResource" {
@@ -104,7 +114,7 @@ resource "aws_api_gateway_integration" "typeOptionsIntegration" {
   type          = "MOCK"
   passthrough_behavior    = "WHEN_NO_TEMPLATES"
   request_templates = {
-    "application/json" = "{\"statusCode\": 200}"
+    "application/json" = "{\\"statusCode\\": 200}"
   }
 }
 resource "aws_api_gateway_integration_response" "typeOptionsIntegrationResponse" {
@@ -122,7 +132,14 @@ resource "aws_api_gateway_integration_response" "typeOptionsIntegrationResponse"
 
 resource "null_resource" "getUrl" {
   provisioner "local-exec" {
-    command = "echo '${aws_api_gateway_deployment.myDeployement.invoke_url}/${aws_api_gateway_resource.myResource.path_part}' > ./url.txt"
+    command = "echo '\${aws_api_gateway_deployment.myDeployement.invoke_url}/\${aws_api_gateway_resource.myResource.path_part}' > ./url.txt"
     interpreter = ["bash", "-c"]
   }
+}`;
+
+// Create Service file
+  _tree.create(
+    `${projectName}/terraform/apigateway.tf`,
+    fileTemplate
+  );
 }

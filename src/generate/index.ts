@@ -35,6 +35,10 @@ import { createYogaDriver } from './templates/src/graphql-yoga-driver';
 import { createCredentials } from './templates/src/credentials';
 import { createPagination } from './templates/src/application/services/dto/pagination.dto';
 import { createIndex } from './templates/src/index';
+import { createApiGateway } from './templates/terraform/apigateway';
+import { createCognito } from './templates/terraform/cognito';
+import { createIam } from './templates/terraform/iam';
+import { createTFVar } from './templates/terraform/terraform.tfvar';
 const fs = require('fs');
 const path = require('path');
 
@@ -109,6 +113,10 @@ export function generate(_options: any): Rule {
     createNodeModel(types, _tree, _options.name);
     createPagination(_tree, _options.name);
     createNodeModelInterface(types, _tree, _options.name);
+    createApiGateway(_tree, _options.name, _options.graphqlFile);
+    createCognito(_tree, _options.name, _options.graphqlFile);
+    createIam(_tree, _options.name, _options.graphqlFile);
+    createTFVar(_tree, _options.name, _options.graphqlFile);
 
     const templateSource = apply(url('./app'), [
       template({

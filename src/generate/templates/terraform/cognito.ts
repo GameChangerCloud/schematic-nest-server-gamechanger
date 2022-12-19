@@ -1,5 +1,15 @@
-resource "aws_cognito_user_pool" "pool" {
-  name = "pool-moviesdir"
+import { Tree } from '@angular-devkit/schematics';
+const path = require('path');
+
+export function createCognito(
+    _tree: Tree,
+    projectName: string,
+    graphqlFileName: string,
+) {
+    const graphqlName = path.parse(graphqlFileName).name;
+    let fileTemplate = 
+`resource "aws_cognito_user_pool" "pool" {
+  name = "pool-${graphqlName}"
   password_policy {
     minimum_length = 6
     require_lowercase = false
@@ -22,7 +32,7 @@ resource "aws_cognito_user_pool" "pool" {
 }
 
 resource "aws_cognito_user_pool_client" "client" {
-  name = "client-moviesdir"
+  name = "client-${graphqlName}"
 
   user_pool_id = aws_cognito_user_pool.pool.id
   callback_urls = ["http://localhost:3000/callback", "http://localhost:4200"]
@@ -35,13 +45,13 @@ resource "aws_cognito_user_pool_client" "client" {
 }
 
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "domain-moviesdir"
+  domain       = "domain-${graphqlName}"
   user_pool_id = aws_cognito_user_pool.pool.id
 }
 
 resource "null_resource" "createUserUnconfirmed" {
   provisioner "local-exec" {
-    command = "aws cognito-idp sign-up --region $AWS_DEFAULT_REGION --client-id ${aws_cognito_user_pool_client.client.id} --username admin@admin.fr --user-attributes Name=\"email\",Value=\"admin@admin.fr\" --password password"
+    command = "aws cognito-idp sign-up --region $AWS_DEFAULT_REGION --client-id \${aws_cognito_user_pool_client.client.id} --username admin@admin.fr --user-attributes Name=\\"email\\",Value=\\"admin@admin.fr\\" --password password"
     interpreter = ["bash", "-c"]  
   }
 }
@@ -49,14 +59,14 @@ resource "null_resource" "createUserUnconfirmed" {
 resource "null_resource" "confirmUserCreate" {
   depends_on = [null_resource.createUserUnconfirmed]
   provisioner "local-exec" {
-    command = "aws cognito-idp admin-confirm-sign-up --region $AWS_DEFAULT_REGION --user-pool-id ${aws_cognito_user_pool.pool.id} --username admin@admin.fr"
+    command = "aws cognito-idp admin-confirm-sign-up --region $AWS_DEFAULT_REGION --user-pool-id \${aws_cognito_user_pool.pool.id} --username admin@admin.fr"
     interpreter = ["bash", "-c"]
   }
 }
 
 resource "null_resource" "getUserPool" {
   provisioner "local-exec" {
-    command = "echo 'poolID: ${aws_cognito_user_pool.pool.id}\n\nclientID: ${aws_cognito_user_pool_client.client.id}' > ./cognito.txt;echo 'poolID: ${aws_cognito_user_pool.pool.id}\n\nclientID: ${aws_cognito_user_pool_client.client.id}\n\ndomain: ${aws_cognito_user_pool_domain.main.domain}' > ./front.txt"
+    command = "echo 'poolID: \${aws_cognito_user_pool.pool.id}\\n\\nclientID: \${aws_cognito_user_pool_client.client.id}' > ./cognito.txt;echo 'poolID: \${aws_cognito_user_pool.pool.id}\\n\\nclientID: \${aws_cognito_user_pool_client.client.id}\\n\\ndomain: \${aws_cognito_user_pool_domain.main.domain}' > ./front.txt"
     interpreter = ["bash", "-c"]
   }
 }
@@ -66,4 +76,11 @@ resource "aws_api_gateway_authorizer" "authorizer" {
   type                   = "COGNITO_USER_POOLS"
   rest_api_id            = aws_api_gateway_rest_api.myAPI.id
   provider_arns          = [aws_cognito_user_pool.pool.arn]
+}`;
+
+// Create Service file
+  _tree.create(
+    `${projectName}/terraform/cognito.tf`,
+    fileTemplate
+  );
 }
