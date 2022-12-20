@@ -7,20 +7,20 @@ export function createTFVar(
     graphqlFileName: string,
 ) {
     const timeElapsed = Date.now();
-    const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5);
+    const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5).replaceAll(':', '-').replace('T', 't');
     const graphqlName = path.parse(graphqlFileName).name;
 
     let fileTemplate = 
 `db_username = "postgres"
 db_password = "postgres"
-cluster_db = "aurora-${graphqlName + '_' + nowISOFormat}"
-db_name = "${graphqlName + '_' + nowISOFormat}_db"
-rds_name ="${graphqlName + '_' + nowISOFormat}-db"
-api_name = "${graphqlName + '_' + nowISOFormat}_api"
-policy_name = "${graphqlName + '_' + nowISOFormat}_policy"
-role_name = "${graphqlName + '_' + nowISOFormat}_role"
-lambda_name = "${graphqlName + '_' + nowISOFormat}_lambda"
-secret_name = "${graphqlName + '_' + nowISOFormat}-secret"\n`;
+cluster_db = "aurora-${graphqlName + '-' + nowISOFormat}"
+db_name = "${graphqlName + nowISOFormat.replaceAll('-', '')}_db"
+rds_name ="${graphqlName + '-' + nowISOFormat}-db"
+api_name = "${graphqlName + '-' + nowISOFormat}_api"
+policy_name = "${graphqlName + '-' + nowISOFormat}_policy"
+role_name = "${graphqlName + '-' + nowISOFormat}_role"
+lambda_name = "${graphqlName + '-' + nowISOFormat}_lambda"
+secret_name = "${graphqlName + '-' + nowISOFormat}-secret"\n`;
 
 // Create Service file
   _tree.create(

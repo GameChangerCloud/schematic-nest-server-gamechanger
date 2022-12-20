@@ -7,7 +7,7 @@ export function createCognito(
     graphqlFileName: string,
 ) {
     const timeElapsed = Date.now();
-    const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5);
+    const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5).replaceAll(':', '-').replace('T', 't');
     const graphqlName = path.parse(graphqlFileName).name;
 
     let fileTemplate = 
@@ -48,7 +48,7 @@ resource "aws_cognito_user_pool_client" "client" {
 }
 
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "domain-${graphqlName + '_' + nowISOFormat}"
+  domain       = "domain-${graphqlName + '-' + nowISOFormat}"
   user_pool_id = aws_cognito_user_pool.pool.id
 }
 
