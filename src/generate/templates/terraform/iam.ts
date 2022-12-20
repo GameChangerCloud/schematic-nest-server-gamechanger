@@ -6,7 +6,10 @@ export function createIam(
     projectName: string,
     graphqlFileName: string,
 ) {
+    const timeElapsed = Date.now();
+    const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5);
     const graphqlName = path.parse(graphqlFileName).name;
+
     let fileTemplate = 
 `data "aws_iam_policy_document" "example" {
     statement {
@@ -36,13 +39,13 @@ export function createIam(
   resource "aws_iam_policy" "example" {
     name        = var.policy_name
     path        = "/"
-    description = "Policy for ${graphqlName}"
+    description = "Policy for ${graphqlName + '_' + nowISOFormat}"
     policy      = data.aws_iam_policy_document.example.json
   }
   
   resource "aws_iam_role" "instance" {
     name               = var.role_name
-    description        = "Role for ${graphqlName}"
+    description        = "Role for ${graphqlName + '_' + nowISOFormat}"
     assume_role_policy = <<EOF
   {
     "Version": "2012-10-17",

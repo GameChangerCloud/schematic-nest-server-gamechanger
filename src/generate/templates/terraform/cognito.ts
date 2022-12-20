@@ -6,10 +6,13 @@ export function createCognito(
     projectName: string,
     graphqlFileName: string,
 ) {
+    const timeElapsed = Date.now();
+    const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5);
     const graphqlName = path.parse(graphqlFileName).name;
+
     let fileTemplate = 
 `resource "aws_cognito_user_pool" "pool" {
-  name = "pool-${graphqlName}"
+  name = "pool-${graphqlName + '_' + nowISOFormat}"
   password_policy {
     minimum_length = 6
     require_lowercase = false
@@ -32,7 +35,7 @@ export function createCognito(
 }
 
 resource "aws_cognito_user_pool_client" "client" {
-  name = "client-${graphqlName}"
+  name = "client-${graphqlName + '_' + nowISOFormat}"
 
   user_pool_id = aws_cognito_user_pool.pool.id
   callback_urls = ["http://localhost:3000/callback", "http://localhost:4200"]
@@ -45,7 +48,7 @@ resource "aws_cognito_user_pool_client" "client" {
 }
 
 resource "aws_cognito_user_pool_domain" "main" {
-  domain       = "domain-${graphqlName}"
+  domain       = "domain-${graphqlName + '_' + nowISOFormat}"
   user_pool_id = aws_cognito_user_pool.pool.id
 }
 

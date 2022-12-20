@@ -6,11 +6,14 @@ export function createApiGateway(
     projectName: string,
     graphqlFileName: string,
 ) {
+    const timeElapsed = Date.now();
+    const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5);
     const graphqlName = path.parse(graphqlFileName).name;
+
     let fileTemplate = 
 `resource "aws_api_gateway_rest_api" "myAPI" {
   name        = var.api_name
-  description = "This is my API for the ${graphqlName} project"
+  description = "This is my API for the ${graphqlName + '_' + nowISOFormat} project"
 }
 
 resource "aws_api_gateway_resource" "myResource" {
