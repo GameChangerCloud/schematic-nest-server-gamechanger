@@ -31,13 +31,9 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
     ConfigModule.forRoot(),
     GraphQLModule.forRoot({
       driver: GraphQLYogaDriver,
-      autoSchemaFile: () => {
-        if (process.env.SECRETARN) {
-          return join(__dirname, '../schema.gql');
-        } else {
-          return join(__dirname, 'schema.gql');
-        }
-      },
+      autoSchemaFile: (() => {
+        return process.env.SECRETARN ? '/tmp/schema.gql' : 'schema.gql';
+      })(),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

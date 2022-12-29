@@ -9,7 +9,7 @@ export function createIndex(
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
-export const lambdaHandler = async (
+export const handler = async (
   event: APIGatewayEvent,
   context: Context,
 ): Promise<APIGatewayProxyResult> => {

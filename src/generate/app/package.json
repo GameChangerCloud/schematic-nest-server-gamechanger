@@ -1,5 +1,5 @@
 {
-  "name": "astronauts-clean-archi",
+  "name": "nest-server-gcc",
   "version": "1.0.0",
   "description": "none",
   "main": "index.js",
@@ -10,10 +10,6 @@
     "start": "nest start",
     "testorm": "tsc && node dist/typeorm/test.js",
     "typeorm": "./node_modules/.bin/typeorm"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://gitlab.com/cfaboumyIppon/astronauts-clean-archi.git"
   },
   "keywords": [],
   "author": "",
@@ -44,6 +40,7 @@
   "dependencies": {
     "@nestjs/cli": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
+    "@graphql-tools/load-files": "^6.6.1",
     "@envelop/apollo-server-errors": "^4.0.3",
     "@envelop/graphql-jit": "^5.0.3",
     "@nestjs/common": "^9.0.0",

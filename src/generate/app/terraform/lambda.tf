@@ -20,7 +20,7 @@ resource "aws_lambda_function" "lambda" {
   description      = "Nest Gamechanger Lamdba"
   role             = aws_iam_role.instance.arn
   filename         = data.archive_file.init.output_path
-  handler          = "dist/index.lambdaHandler"
+  handler          = "dist/index.handler"
   runtime          = "nodejs18.x"
   memory_size      = 256
   timeout          = 60

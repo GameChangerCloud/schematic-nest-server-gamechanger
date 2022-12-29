@@ -35,6 +35,7 @@ resource "aws_api_gateway_integration" "myIntegration" {
   rest_api_id = aws_api_gateway_rest_api.myAPI.id
   resource_id = aws_api_gateway_method.myMethodGET.resource_id
   http_method = aws_api_gateway_method.myMethodGET.http_method
+  timeout_milliseconds = 29000
 
   integration_http_method = "POST"
   type                    = "AWS"
