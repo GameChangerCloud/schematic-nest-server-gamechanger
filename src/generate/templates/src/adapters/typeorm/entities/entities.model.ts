@@ -25,7 +25,7 @@ import { I${typeName} as ${typeName}Model } from 'domain/model/${strings.decamel
 import { Node } from './node.model';
 ${generateEntityRelationsModelImportsTemplate(type, types)[2]}${classValidatorsImport(type)}
 @Entity({ name: '${strings.decamelize(typeName)}' })
-@ObjectType()
+@ObjectType('${typeName}')
 export class ${typeName} extends Node implements ${typeName}Model {${generateEntityFieldsTemplate(types, type)}
 }
 `;

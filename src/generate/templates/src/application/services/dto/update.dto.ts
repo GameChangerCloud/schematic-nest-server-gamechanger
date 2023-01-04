@@ -17,11 +17,11 @@ export function createUpdateDto(
 
 import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';${importTemplate}${validatorsImportTemplate}
 
-@InputType()
+@InputType('${type.typeName}UpdateInput')
 export class ${type.typeName}UpdateInput {
 ${stdScalarsTemplate}${stdRelationshipsTemplate}}
 
-@ObjectType()
+@ObjectType('${type.typeName}UpdateOutput')
 export class ${type.typeName}UpdateOutput {
   @Field(() => ${type.typeName})
   ${strings.camelize(type.typeName)}: ${type.typeName};
@@ -96,7 +96,7 @@ function computeScalarsTemplate(type: Type): string[] {
   let typeValidatorsToImport = classValidatorsImport(type);
   if (validatorsToImportFromDirective.length > 0 || typeValidatorsToImport.length > 0) {
     let totalValidators = validatorsToImportFromDirective.concat(typeValidatorsToImport);
-    validatorsImportTemplate = `\nimport { ${totalValidators.join(', ')} } from 'class-validator';\n`;
+    validatorsImportTemplate = `\nimport { ${totalValidators.join(', ')} } from 'class-validator';`;
   }
   
 

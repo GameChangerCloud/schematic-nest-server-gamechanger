@@ -14,10 +14,10 @@ import {
   ${type.typeName}UpdateOutput,
 } from './${strings.camelize(type.typeName)}-update.dto';${handleIdField(type)[1]}
 
-@InputType()
+@InputType('${type.typeName}CreateInput')
 export class ${type.typeName}CreateInput extends ${type.typeName}UpdateInput {${handleIdField(type)[2]}}
 
-@ObjectType()
+@ObjectType('${type.typeName}CreateOutput')
 export class ${type.typeName}CreateOutput extends ${type.typeName}UpdateOutput {}
 `;
 

@@ -17,7 +17,7 @@ import {
   SortDirection,
 } from 'application/services/dto/pagination/pagination.dto';
 
-@InputType()
+@InputType('${pluralize(type.typeName)}PaginationSortBy')
 export class ${pluralize(type.typeName)}PaginationSortBy extends PaginationSortBy {${handleSortingArguments(type)}}
 
 @ArgsType()
@@ -26,7 +26,7 @@ export class ${pluralize(type.typeName)}PaginationArgs extends PaginationArgs {
   sortBy?: ${pluralize(type.typeName)}PaginationSortBy;
 }
 
-@ObjectType()
+@ObjectType('${pluralize(type.typeName)}Pagination')
 export class ${pluralize(type.typeName)}Pagination extends Pagination {
   @Field(() => [${type.typeName}])
   nodes: ${type.typeName}[];

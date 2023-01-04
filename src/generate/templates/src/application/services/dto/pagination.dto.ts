@@ -24,7 +24,7 @@ registerEnumType(SortDirection, {
   name: 'SortDirection',
 });
 
-@InputType()
+@InputType('PaginationSortBy')
 export class PaginationSortBy {
   @Field(() => SortDirection, { nullable: true })
   createdAt?: SortDirection;

@@ -12,8 +12,8 @@ export function createFieldPaginationDto(
     let fileTemplate = `import { Field, ObjectType } from '@nestjs/graphql';
 import { ${relatedField.type} } from 'adapters/typeorm/entities/${strings.camelize(relatedField.type)}.model';
 import { Pagination } from '../pagination/pagination.dto';
-    
-@ObjectType()
+
+@ObjectType('${type.typeName}${strings.capitalize(relatedField.name)}Pagination')
 export class ${type.typeName}${strings.capitalize(relatedField.name)}Pagination extends Pagination {
   @Field(() => [${relatedField.type}])
   nodes: ${relatedField.type}[];

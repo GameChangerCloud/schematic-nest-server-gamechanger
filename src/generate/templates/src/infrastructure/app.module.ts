@@ -22,7 +22,7 @@ import { ${type.typeName}Module } from 'infrastructure/modules/${strings.cameliz
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { join } from 'path';
+import * as path from 'path';
 import { Constants } from 'config/credentials';${entitiesModulesImport}
 import { GraphQLYogaDriver } from './graphql-yoga-driver';
 
@@ -31,9 +31,7 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
     ConfigModule.forRoot(),
     GraphQLModule.forRoot({
       driver: GraphQLYogaDriver,
-      autoSchemaFile: (() => {
-        return process.env.SECRETARN ? '/tmp/schema.gql' : 'schema.gql';
-      })(),
+      autoSchemaFile: true,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -46,7 +44,7 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
             secretArn: process.env.SECRETARN,
             resourceArn: process.env.RESOURCEARN,
             region: 'eu-west-1',
-            entities: [join(__dirname, '**', '*.model.{ts,js}')],
+            entities: [path.join(__dirname, '**', '*.model.{ts,js}')],
             synchronize: false,
             logging: true,
             playground: false,
@@ -59,7 +57,7 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
             username: Constants.DATABASE_USER,
             password: Constants.DATABASE_PASSWORD,
             database: Constants.DATABASE_DB,
-            entities: [join(__dirname, '**', '*.model.{ts,js}')],
+            entities: [path.join(__dirname, '**', '*.model.{ts,js}')],
             synchronize: true,
             logging: true,
             debug: true,

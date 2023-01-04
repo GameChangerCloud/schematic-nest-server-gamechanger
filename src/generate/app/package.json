@@ -40,7 +40,6 @@
   "dependencies": {
     "@nestjs/cli": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
-    "@graphql-tools/load-files": "^6.6.1",
     "@envelop/apollo-server-errors": "^4.0.3",
     "@envelop/graphql-jit": "^5.0.3",
     "@nestjs/common": "^9.0.0",

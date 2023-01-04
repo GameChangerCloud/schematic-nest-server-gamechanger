@@ -10,7 +10,7 @@ export function createDeleteDto(
     let fileTemplate = `import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';
 
-@ObjectType()
+@ObjectType('${type.typeName}DeleteOutput')
 export class ${type.typeName}DeleteOutput {
   @Field(() => ID)
   ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'];
