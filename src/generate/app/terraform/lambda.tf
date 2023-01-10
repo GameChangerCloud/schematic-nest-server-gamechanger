@@ -9,21 +9,22 @@ resource "null_resource" "downsizing" {
 data "archive_file" "init" {
   type        = "zip"
   source_dir  = "${path.module}/.."
-  excludes    = ["terraform", ".aws-sam"]
+  excludes    = ["terraform", ".aws-sam", "src"]
   output_path = "${path.module}/lambda.zip"
 }
 
 
 resource "aws_lambda_function" "lambda" {
-  source_code_hash = data.archive_file.init.output_base64sha256
-  function_name    = var.lambda_name
-  description      = "Nest Gamechanger Lamdba"
-  role             = aws_iam_role.instance.arn
-  filename         = data.archive_file.init.output_path
-  handler          = "dist/index.handler"
-  runtime          = "nodejs18.x"
-  memory_size      = 256
-  timeout          = 60
+  source_code_hash       = data.archive_file.init.output_base64sha256
+  function_name          = var.lambda_name
+  description            = "Nest Gamechanger Lamdba"
+  role                   = aws_iam_role.instance.arn
+  filename               = data.archive_file.init.output_path
+  handler                = "dist/index.handler"
+  runtime                = "nodejs18.x"
+  memory_size            = 256
+  timeout                = 60
+
   environment {
     variables = {
       SECRETARN   = aws_secretsmanager_secret.example.arn

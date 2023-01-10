@@ -14,7 +14,7 @@ export function createTFVar(
 `db_username = "postgres"
 db_password = "postgres"
 cluster_db = "aurora-${graphqlName + '-' + nowISOFormat}"
-db_name = "${graphqlName + nowISOFormat.replaceAll('-', '')}_db"
+db_name = "${graphqlName.replaceAll('-', '') + nowISOFormat.replaceAll('-', '')}"
 rds_name ="${graphqlName + '-' + nowISOFormat}-db"
 api_name = "${graphqlName + '-' + nowISOFormat}_api"
 policy_name = "${graphqlName + '-' + nowISOFormat}_policy"

@@ -31,44 +31,57 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
     ConfigModule.forRoot(),
     GraphQLModule.forRoot({
       driver: GraphQLYogaDriver,
-      autoSchemaFile: true,
+      debug: true,
+      playground: false,
+      autoSchemaFile: () => {
+        if (process.env.SECRETARN) {
+          return path.join(__dirname, '../schema.gql')
+        } else {
+          return path.join(__dirname, 'schema.gql')
+        }
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: () => {
         if (process.env.SECRETARN) {
-          return {
-            type: 'aurora-postgres',
-            database: process.env.DATABASE,
-            secretArn: process.env.SECRETARN,
-            resourceArn: process.env.RESOURCEARN,
-            region: 'eu-west-1',
-            entities: [path.join(__dirname, '**', '*.model.{ts,js}')],
-            synchronize: false,
-            logging: true,
-            playground: false,
-          };
+          return (
+            {
+            'type': 'aurora-postgres',
+            'database': process.env.DATABASE,
+            'secretArn': process.env.SECRETARN,
+            'resourceArn': process.env.RESOURCEARN,
+            'region': 'eu-west-1',
+            'entities': [path.join(__dirname, '**', '*.model.js')],
+            'synchronize': false,
+            'playground': false,
+            'retryAttempts': 3,
+            'logging': true,
+            'debug': true,
+            })
         } else {
-          return {
-            type: 'postgres',
-            host: Constants.DATABASE_HOST,
-            port: Constants.DATABASE_PORT,
-            username: Constants.DATABASE_USER,
-            password: Constants.DATABASE_PASSWORD,
-            database: Constants.DATABASE_DB,
-            entities: [path.join(__dirname, '**', '*.model.{ts,js}')],
-            synchronize: true,
-            logging: true,
-            debug: true,
-          };
+          return (
+            {
+              'type': 'postgres',
+              'host': Constants.DATABASE_HOST,
+              'port': Constants.DATABASE_PORT,
+              'username': Constants.DATABASE_USER,
+              'password': Constants.DATABASE_PASSWORD,
+              'database': Constants.DATABASE_DB,
+              'entities': [path.join(__dirname, '**', '*.model.js')],
+              'synchronize': true,
+              'playground': true,
+              'retryAttempts': 3,
+              'logging': true,
+              'debug': true,
+            })
         }
-      },
+      }
     }),${entitiesModules}
   ],
 })
-export class AppModule {}
-`;
+export class AppModule {}\n`;
     // Create Service file
     _tree.create(
       `${projectName}/src/app.module.ts`,

@@ -39,6 +39,7 @@ import { createApiGateway } from './templates/terraform/apigateway';
 import { createCognito } from './templates/terraform/cognito';
 import { createIam } from './templates/terraform/iam';
 import { createTFVar } from './templates/terraform/terraform.tfvar';
+import { createDatasourceForHandler } from './templates/src/datasource';
 const fs = require('fs');
 const path = require('path');
 
@@ -110,6 +111,7 @@ export function generate(_options: any): Rule {
     createCredentials(_tree, _options.name);
     createAppModule(types, _tree, _options.name);
     createDatasource(types, _tree, _options.name);
+    createDatasourceForHandler(_tree, _options.name);
     createNodeModel(types, _tree, _options.name);
     createPagination(_tree, _options.name);
     createNodeModelInterface(types, _tree, _options.name);
