@@ -61,7 +61,6 @@ import { ${type.typeName}FieldsResolver } from 'infrastructure/resolvers/${strin
         relationalFields
           .filter((field) => field.type !== type.typeName)
           .forEach((relationalField) => {
-            // Si ref dans les types associés, initialiser forwardRefImport forwardRefModu & refMod
             entitiesImport += `
 import { ${relationalField.type} } from 'adapters/typeorm/entities/${strings.camelize(relationalField.type)}.model';`;
             entitiesModulesImport +=`

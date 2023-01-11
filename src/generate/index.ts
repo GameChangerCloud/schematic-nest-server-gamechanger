@@ -16,7 +16,6 @@ import { createGetOneDto } from './templates/src/application/services/dto/getOne
 import { createUpdateDto } from './templates/src/application/services/dto/update.dto';
 import { createService } from './templates/src/application/services/service';
 import { createModule } from './templates/src/infrastructure/module';
-//import { paginationDto } from './templates/src/application/services/dto/pagination.dto';
 import { createServiceInterface } from './templates/src/domain/service.interface';
 import { createTypeOrmEntityFile } from './templates/src/adapters/typeorm/entities/entities.model';
 import { createTypeOrmEnumFile } from './templates/src/adapters/typeorm/entities/enum.model';
@@ -39,7 +38,6 @@ import { createApiGateway } from './templates/terraform/apigateway';
 import { createCognito } from './templates/terraform/cognito';
 import { createIam } from './templates/terraform/iam';
 import { createTFVar } from './templates/terraform/terraform.tfvar';
-import { createDatasourceForHandler } from './templates/src/datasource';
 const fs = require('fs');
 const path = require('path');
 
@@ -110,8 +108,7 @@ export function generate(_options: any): Rule {
     createYogaDriver(_tree, _options.name);
     createCredentials(_tree, _options.name);
     createAppModule(types, _tree, _options.name);
-    createDatasource(types, _tree, _options.name);
-    createDatasourceForHandler(_tree, _options.name);
+    createDatasource(_tree, _options.name);
     createNodeModel(types, _tree, _options.name);
     createPagination(_tree, _options.name);
     createNodeModelInterface(types, _tree, _options.name);

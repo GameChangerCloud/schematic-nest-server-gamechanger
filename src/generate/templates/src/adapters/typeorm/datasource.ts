@@ -1,49 +1,47 @@
-import { strings } from '@angular-devkit/core';
 import { Tree } from '@angular-devkit/schematics';
-import { Type } from 'easygraphql-parser-gamechanger';
 
 export function createDatasource(
-    types: Type[],
     _tree: Tree,
     projectName: string
 ) {
-    let [entitiesImports, entitiesList] = computeEntitiesListAndImports(types);
 
     let fileTemplate = 
 `import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import { Constants } from 'config/credentials';${entitiesImports}
+import { Constants } from 'config/credentials';
+import * as path from 'path';
 
-export const AppDataSource = new DataSource({
-  type: 'postgres',
-  host: Constants.DATABASE_HOST,
-  port: Constants.DATABASE_PORT,
-  username: Constants.DATABASE_USER,
-  password: Constants.DATABASE_PASSWORD,
-  database: Constants.DATABASE_DB,
-  synchronize: true,
-  logging: true,
-  entities: [${entitiesList}],
-  subscribers: [],
-  migrations: [],
-});\n`;
+let AppDataSource: DataSource;
+if (process.env.SECRETARN) {
+  AppDataSource = new DataSource({
+    type: 'aurora-postgres',
+    database: process.env.DATABASE,
+    secretArn: process.env.SECRETARN,
+    resourceArn: process.env.RESOURCEARN,
+    region: 'eu-west-1',
+    entities: [path.join(__dirname, '**', '*.model.js')],
+    synchronize: false,
+    logging: true,
+  });
+} else {
+  AppDataSource = new DataSource({
+    type: 'postgres',
+    host: Constants.DATABASE_HOST,
+    port: Constants.DATABASE_PORT,
+    username: Constants.DATABASE_USER,
+    password: Constants.DATABASE_PASSWORD,
+    database: Constants.DATABASE_DB,
+    entities: [path.join(__dirname, '**', '*.model.js')],
+    synchronize: true,
+    logging: true,
+  });
+}
+
+export { AppDataSource };\n`;
 
   // Create Service file
   _tree.create(
     `${projectName}/src/adapters/typeorm/datasource.ts`,
     fileTemplate
   );
-}
-
-function computeEntitiesListAndImports(types: Type[]) {
-  let entitiesImports = '';
-  let entitiesList = '';
-  let objectTypes = types.filter((type) => type.type === 'ObjectTypeDefinition' && type.isNotOperation());
-  for (let i = 0; i < objectTypes.length; i++) {
-    entitiesImports += `\nimport { ${objectTypes[i].typeName} } from './entities/${strings.camelize(objectTypes[i].typeName)}.model';`;
-    if (i === objectTypes.length - 1) entitiesList += `${objectTypes[i].typeName}`;
-    else entitiesList += `${objectTypes[i].typeName}, `;
-  }
-
-  return [entitiesImports, entitiesList];
 }

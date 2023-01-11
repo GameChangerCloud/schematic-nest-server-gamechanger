@@ -61,7 +61,6 @@ private userService: UserService,`
 
 
 function generateResolveFields(type:Type): string {
-  // let typeName = type.typeName
   let template =
 `@ResolveField(() => Planet, { nullable: true })
 async planet(@Parent() astronaut: Astronaut) {

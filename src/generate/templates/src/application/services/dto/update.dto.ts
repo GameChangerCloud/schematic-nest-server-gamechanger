@@ -72,12 +72,10 @@ function computeScalarsTemplate(type: Type): string[] {
     switch(scalar.type) {
       case 'String' :
         scalarTypeGQL = 'String';
-        //[fieldDirective, validatorsToImportFromDirective] = computeFieldDirective(scalar, scalar.type, validatorsToImportFromDirective);
         break;
       case 'Float' :
       case 'Int' :
         scalarTypeGQL = 'Number';
-        //[fieldDirective, validatorsToImportFromDirective] = computeFieldDirective(scalar, scalar.type, validatorsToImportFromDirective);
         break;
       case 'Boolean' :
         scalarTypeGQL = 'Boolean';
