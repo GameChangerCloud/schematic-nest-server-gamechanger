@@ -15,7 +15,6 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.0",
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.21",

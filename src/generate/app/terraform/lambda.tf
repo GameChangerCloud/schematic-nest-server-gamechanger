@@ -6,11 +6,25 @@ resource "null_resource" "downsizing" {
   }
 }
 
+resource "null_resource" "nestbuild" {
+  provisioner "local-exec" {
+    working_dir = "${path.module}/.."
+    command     = "nest build"
+    interpreter = ["bash", "-c"]
+  }
+  depends_on = [
+    null_resource.downsizing
+  ]
+}
+
 data "archive_file" "init" {
   type        = "zip"
   source_dir  = "${path.module}/.."
   excludes    = ["terraform", ".aws-sam", "src"]
   output_path = "${path.module}/lambda.zip"
+    depends_on = [
+    null_resource.nestbuild
+  ]
 }
 
 
@@ -44,7 +58,9 @@ resource "aws_lambda_function" "lambda" {
               EOT
     interpreter = ["bash", "-c"]
   }
-
+  depends_on = [
+    null_resource.nestbuild
+  ]
 
 }
 
