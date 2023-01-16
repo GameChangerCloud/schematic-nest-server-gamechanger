@@ -107,12 +107,14 @@ function computeRelationshipsTemplate(type: Type): string {
   const relationships = type.fields.filter(field => field.relation && !field.isDeprecated && !field.isEnum);
   enums.forEach((enumField) => {
     let enumsTemplate;
+    const noNullOption = enumField.noNull ? '' : ', { nullable: true }';
+    const noNullCharacter = enumField.noNull ? '' : '?';
     if (enumField.isArray) {
-      enumsTemplate = `  @Field(() => [${enumField.type}])
-  ${enumField.name}: ${enumField.type}[];\n\n`;
+      enumsTemplate = `  @Field(() => [${enumField.type}]${noNullOption})
+  ${enumField.name}${noNullCharacter}: ${enumField.type}[];\n\n`;
     } else {
-      enumsTemplate = `  @Field(() => ${enumField.type})
-  ${enumField.name}: ${enumField.type};\n\n`;
+      enumsTemplate = `  @Field(() => ${enumField.type}${noNullOption})
+  ${enumField.name}${noNullCharacter}: ${enumField.type};\n\n`;
     }
     relationshipsAndEnumsTemplate += enumsTemplate;
   });
