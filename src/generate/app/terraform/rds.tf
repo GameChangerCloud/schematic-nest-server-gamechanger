@@ -24,7 +24,7 @@ module "rds_aurora_postgresql"{
   name              = var.rds_name
   engine            = "aurora-postgresql"
   engine_mode       = "serverless"
-  engine_version    = "10.7"
+  engine_version    = "11.13"
   storage_encrypted = true
 
   vpc_id                = data.aws_vpc.default.id

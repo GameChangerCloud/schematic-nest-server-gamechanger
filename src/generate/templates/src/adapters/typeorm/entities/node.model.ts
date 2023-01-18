@@ -35,18 +35,18 @@ export abstract class Node extends BaseEntity {${handleIdGeneration(types)[2]}
 function handleIdGeneration(types: Type[]): string[] {
   let typesHaveIDs = false;
   let importID = '';
-  let importPrimaryGeneratedColumn = '';
-  let primaryGeneratedColumn = '';
+  let importPrimaryColumn = '';
+  let primaryColumn = '';
   types.forEach((type) => {
     if (type.fields.find((field => field.type === 'ID'))) typesHaveIDs = true;
   })
   if (!typesHaveIDs) {
     importID = 'ID, ';
-    importPrimaryGeneratedColumn = '\n  PrimaryGeneratedColumn,'
-    primaryGeneratedColumn = `\n  @Field(() => ID)
-  @PrimaryGeneratedColumn('uuid')
+    importPrimaryColumn = '\n  PrimaryColumn,' //PrimaryGeneratedColumn & @PrimaryGeneratedColumn('uuid') 
+    primaryColumn = `\n  @Field(() => ID)
+  @PrimaryColumn() 
   id: string;
 `;
   }
-  return [importID, importPrimaryGeneratedColumn, primaryGeneratedColumn];
+  return [importID, importPrimaryColumn, primaryColumn];
 }

@@ -71,8 +71,6 @@ exports.handler = async function (
           schema: schema,
           source: eventObject.query,
         });
-        const resultObject = JSON.parse(JSON.stringify(result, null, 4));
-        if(resultObject.errors !== undefined && resultObject.errors.length > 0) throw (resultObject.errors[0].message);
         return {
           statusCode: 200,
           body: result,

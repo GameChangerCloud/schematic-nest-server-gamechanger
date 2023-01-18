@@ -22,7 +22,7 @@ export function createService(
       relatedRepositoryImport
       ] = computeRelationshipsTemplates(type);
     let updateFields = computeFieldTemplate(type)
-    let fileTemplate = `import { ${forwardRefAndInjectImport}Injectable } from '@nestjs/common';
+    let fileTemplate = `${handleIdGeneration(type)[0]}import { ${forwardRefAndInjectImport}Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';
@@ -45,7 +45,7 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
   ) {}
 
   async ${strings.camelize(type.typeName)}Create(input: ${type.typeName}CreateInput): Promise<${type.typeName}CreateOutput> {
-    const ${strings.camelize(type.typeName)} = this.${strings.camelize(type.typeName)}Repository.create(input);${createRelationships}${initRelationships}
+    const ${strings.camelize(type.typeName)} = this.${strings.camelize(type.typeName)}Repository.create(input);${createRelationships}${initRelationships}${handleIdGeneration(type)[1]}
     await ${strings.camelize(type.typeName)}.save();
     return { ${strings.camelize(type.typeName)} };
   }
@@ -321,4 +321,15 @@ function handleSortingInstructions(type: Type): string {
       }`;
   });
   return sortingInstructions;
+}
+
+function handleIdGeneration(type: Type): string[] {
+  let importUUID = '';
+  let idTemplate = '';
+  const idField = type.fields.find((field => field.type === 'ID'));
+  if (!idField) {
+    importUUID += `import { v4 as uuidv4 } from 'uuid';\n`
+    idTemplate += `\n    studio.id = uuidv4();`;
+  }
+  return [importUUID, idTemplate]
 }

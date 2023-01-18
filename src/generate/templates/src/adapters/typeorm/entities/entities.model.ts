@@ -129,7 +129,7 @@ function generateEntityRelationsModelImportsTemplate(
   if (idField) {
     idImport = `ID, `;
     primaryColumnImport = `\n  PrimaryColumn,`;
-  } else if (!nodeId) primaryColumnImport = `\n  PrimaryGeneratedColumn,`;
+  } else if (!nodeId) primaryColumnImport = `\n  PrimaryColumn,`; // PrimaryGeneratedColumn
 
   type.relationList.forEach(
     (relation: {
@@ -164,7 +164,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
   types.forEach((type) => {
     if (type.fields.find((field => field.type === 'ID'))) nodeId = false;
   });
-  if (!nodeId && !idField) entityFieldsTemplate += `\n  @Field(() => ID)\n  @PrimaryGeneratedColumn('uuid')\n  id: string;\n`;
+  if (!nodeId && !idField) entityFieldsTemplate += `\n  @Field(() => ID)\n  @PrimaryColumn()\n  id: string;\n`; //@PrimaryGeneratedColumn("uuid")
 
 
   type.fields.forEach((field: Field)=>{
