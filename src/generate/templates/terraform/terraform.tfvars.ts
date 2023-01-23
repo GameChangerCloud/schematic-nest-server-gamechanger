@@ -24,7 +24,7 @@ secret_name = "${graphqlName + '-' + nowISOFormat}-secret"\n`;
 
 // Create Service file
   _tree.create(
-    `${projectName}/terraform/terraform.tfvar`,
+    `${projectName}/terraform/terraform.tfvars`,
     fileTemplate
   );
 }

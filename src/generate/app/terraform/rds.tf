@@ -23,8 +23,8 @@ module "rds_aurora_postgresql"{
  
   name              = var.rds_name
   engine            = "aurora-postgresql"
-  engine_mode       = "serverless"
-  engine_version    = "11.13"
+  engine_mode       = "provisioned"
+  engine_version    = "14.7"
   storage_encrypted = true
 
   vpc_id                = data.aws_vpc.default.id
@@ -59,14 +59,12 @@ module "rds_aurora_postgresql"{
 
 resource "aws_db_parameter_group" "postgresql" {
   name        = "${var.rds_name}"
-  family      = "aurora-postgresql10"
+  family      = "aurora-postgresql14"
   description = "${var.rds_name}-aurora-db-postgres-parameter-group"
 }
 
 resource "aws_rds_cluster_parameter_group" "postgresql" {
   name        = "${var.cluster_db}"
-  family      = "aurora-postgresql10"
+  family      = "aurora-postgresql14"
   description = "${var.rds_name}-aurora-postgres-cluster-parameter-group"
 }
-
-

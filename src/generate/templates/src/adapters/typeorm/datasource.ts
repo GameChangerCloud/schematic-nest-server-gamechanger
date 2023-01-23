@@ -14,12 +14,13 @@ import * as path from 'path';
 let AppDataSource: DataSource;
 if (process.env.SECRETARN) {
   AppDataSource = new DataSource({
-    type: 'aurora-postgres',
-    database: process.env.DATABASE,
-    secretArn: process.env.SECRETARN,
-    resourceArn: process.env.RESOURCEARN,
-    region: 'eu-west-1',
+    type: 'postgres',
+    host: process.env.DATABASE_HOST,
     entities: [path.join(__dirname, '**', '*.model.js')],
+    port: parseInt(process.env.DATABASE_PORT, 10),
+    username: process.env.DATABASE_USER,
+    password: process.env.DATABASE_PASSWORD,
+    database: process.env.DATABASE_DB,
     synchronize: false,
     logging: true,
   });

@@ -41,6 +41,11 @@ resource "aws_lambda_function" "lambda" {
 
   environment {
     variables = {
+      DATABASE_DB = module.rds_aurora_postgresql.cluster_database_name
+      DATABASE_USER = module.rds_aurora_postgresql.cluster_master_username
+      DATABASE_PORT = module.rds_aurora_postgresql.cluster_port
+      DATABASE_HOST = module.rds_aurora_postgresql.cluster_endpoint
+      DATABASE_PASSWORD = module.rds_aurora_postgresql.cluster_master_password
       SECRETARN   = aws_secretsmanager_secret.example.arn
       RESOURCEARN = module.rds_aurora_postgresql.cluster_arn
       DATABASE    = var.db_name

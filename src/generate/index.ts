@@ -37,7 +37,7 @@ import { createIndex } from './templates/src/index';
 import { createApiGateway } from './templates/terraform/apigateway';
 import { createCognito } from './templates/terraform/cognito';
 import { createIam } from './templates/terraform/iam';
-import { createTFVar } from './templates/terraform/terraform.tfvar';
+import { createTFVar } from './templates/terraform/terraform.tfvars';
 const fs = require('fs');
 const path = require('path');
 
