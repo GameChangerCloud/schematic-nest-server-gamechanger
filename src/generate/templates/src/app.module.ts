@@ -34,7 +34,7 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
       debug: true,
       playground: false,
       autoSchemaFile: () => {
-        if (process.env.SECRETARN) {
+        if (true) {
           return path.join(__dirname, '../schema.gql')
         } else {
           return path.join(__dirname, 'schema.gql')
@@ -45,7 +45,7 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: () => {
-        if (process.env.SECRETARN) {
+        if (true) {
           return {
             type: 'postgres',
             host: process.env.DATABASE_HOST,

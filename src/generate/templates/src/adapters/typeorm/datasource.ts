@@ -12,7 +12,7 @@ import { Constants } from 'config/credentials';
 import * as path from 'path';
 
 let AppDataSource: DataSource;
-if (process.env.SECRETARN) {
+if (true) {
   AppDataSource = new DataSource({
     type: 'postgres',
     host: process.env.DATABASE_HOST,
