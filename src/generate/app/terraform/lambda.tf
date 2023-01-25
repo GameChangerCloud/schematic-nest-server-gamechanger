@@ -22,35 +22,34 @@ data "archive_file" "init" {
   source_dir  = "${path.module}/.."
   excludes    = ["terraform", ".aws-sam", "src"]
   output_path = "${path.module}/lambda.zip"
-    depends_on = [
+  depends_on = [
     null_resource.nestbuild
   ]
 }
 
 
 resource "aws_lambda_function" "lambda" {
-  source_code_hash       = data.archive_file.init.output_base64sha256
-  function_name          = var.lambda_name
-  description            = "Nest Gamechanger Lamdba"
-  role                   = aws_iam_role.instance.arn
-  filename               = data.archive_file.init.output_path
-  handler                = "dist/index.handler"
-  runtime                = "nodejs18.x"
-  memory_size            = 256
-  timeout                = 60
+  source_code_hash = data.archive_file.init.output_base64sha256
+  function_name    = var.lambda_name
+  description      = "Nest Gamechanger Lamdba"
+  role             = aws_iam_role.instance.arn
+  handler          = "dist/index.handler"
+  runtime          = "nodejs18.x"
+  memory_size      = 256
+  timeout          = 60
+  s3_bucket        = aws_s3_bucket.bucket.bucket
+  s3_key           = "lambda.zip"
 
   environment {
     variables = {
-      DATABASE_DB = module.rds_aurora_postgresql.cluster_database_name
-      DATABASE_USER = module.rds_aurora_postgresql.cluster_master_username
-      DATABASE_PORT = module.rds_aurora_postgresql.cluster_port
-      DATABASE_HOST = module.rds_aurora_postgresql.cluster_endpoint
+      DATABASE_DB       = module.rds_aurora_postgresql.cluster_database_name
+      DATABASE_USER     = module.rds_aurora_postgresql.cluster_master_username
+      DATABASE_PORT     = module.rds_aurora_postgresql.cluster_port
+      DATABASE_HOST     = module.rds_aurora_postgresql.cluster_endpoint
       DATABASE_PASSWORD = module.rds_aurora_postgresql.cluster_master_password
-      SECRETARN   = aws_secretsmanager_secret.example.arn
-      RESOURCEARN = module.rds_aurora_postgresql.cluster_arn
-      DATABASE    = var.db_name
     }
   }
+
   provisioner "local-exec" {
     command     = <<EOT
                 export arn=${module.rds_aurora_postgresql.cluster_arn}
