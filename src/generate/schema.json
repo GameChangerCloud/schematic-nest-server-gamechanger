@@ -7,18 +7,17 @@
   "properties": {
     "name": {
       "description": "Name of the new app.",
-      "type": "string",
+
       "pattern": "^(?:@[a-zA-Z0-9-*~][a-zA-Z0-9-*._~]*/)?[a-zA-Z0-9-~][a-zA-Z0-9-._~]*$",
       "default": "nest-server-gamechanger",
       "x-prompt": "What name would you like to use ?"
     },
-    "graphqlFile": {
-      "type": "string",
+    "graphql-file": {
       "description": "Path of the graphQl schema",
       "minLength": 1,
-      "default": "movies.graphql",
+      "default": "schema.graphql",
       "x-prompt": "Please fill the name of your graphQL schema (ex : astronauts.graphql)"
     }
   },
-  "required": ["name", "graphqlFile"]
+  "required": ["name", "graphql-file"]
  }

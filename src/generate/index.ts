@@ -60,12 +60,13 @@ export function generate(_options: any): Rule {
     // if(!_options.gqlFilePath){
     //   throw new SchematicsException('GCL schema File path is required.');
     // }
-
+    console.log(_options);
+    
     /**
      * INIT GAMECHANGER TYPES
      */
 
-    let types = initTypes(_options.graphqlFile);
+    let types = initTypes(_options["graphql-file"]);
     
 
     /**
@@ -112,10 +113,10 @@ export function generate(_options: any): Rule {
     createNodeModel(types, _tree, _options.name);
     createPagination(_tree, _options.name);
     createNodeModelInterface(types, _tree, _options.name);
-    createApiGateway(_tree, _options.name, _options.graphqlFile);
-    createCognito(_tree, _options.name, _options.graphqlFile);
-    createIam(_tree, _options.name, _options.graphqlFile);
-    createTFVar(_tree, _options.name, _options.graphqlFile);
+    createApiGateway(_tree, _options.name,_options["graphql-file"]);
+    createCognito(_tree, _options.name, _options["graphql-file"]);
+    createIam(_tree, _options.name, _options["graphql-file"]);
+    createTFVar(_tree, _options.name, _options["graphql-file"]);
 
     const templateSource = apply(url('./app'), [
       template({
