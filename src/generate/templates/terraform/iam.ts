@@ -8,7 +8,7 @@ export function createIam(
 ) {
     const timeElapsed = Date.now();
     const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5).replaceAll(':', '-').replace('T', 't');
-    const graphqlName = path.parse(graphqlFileName).name;
+    const graphqlName = path.parse(graphqlFileName.toLocaleLowerCase()).name;
 
     let fileTemplate = 
 `data "aws_iam_policy_document" "example" {
