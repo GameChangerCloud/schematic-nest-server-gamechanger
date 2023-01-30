@@ -1,7 +1,9 @@
 import { strings } from '@angular-devkit/core';
-import { apply, chain, mergeWith, move, Rule, SchematicContext, 
+import {
+  apply, chain, mergeWith, move, Rule, SchematicContext,
   // SchematicsException, 
-  template, Tree, url } from '@angular-devkit/schematics';
+  template, Tree, url
+} from '@angular-devkit/schematics';
 import {
   schemaParser,
   getRelations,
@@ -34,9 +36,6 @@ import { createYogaDriver } from './templates/src/graphql-yoga-driver';
 import { createCredentials } from './templates/src/credentials';
 import { createPagination } from './templates/src/application/services/dto/pagination.dto';
 import { createIndex } from './templates/src/index';
-import { createApiGateway } from './templates/terraform/apigateway';
-import { createCognito } from './templates/terraform/cognito';
-import { createIam } from './templates/terraform/iam';
 import { createTFVar } from './templates/terraform/terraform.tfvars';
 const fs = require('fs');
 const path = require('path');
@@ -66,7 +65,7 @@ export function generate(_options: any): Rule {
      */
 
     let types = initTypes(_options.graphqlFile);
-    
+
 
     /**
      * NEST SERVER GENERATION
@@ -92,7 +91,7 @@ export function generate(_options: any): Rule {
           });
         }
         createService(types, type, _tree, _options.name);
-        createTypeOrmEntityFile(type,types, _tree, _options.name);
+        createTypeOrmEntityFile(type, types, _tree, _options.name);
         createDomainModelInterfaceFile(types, type, _tree, _options.name);
         createMutationsResolver(type, _tree, _options.name);
         createQueriesResolver(type, _tree, _options.name);
@@ -112,9 +111,6 @@ export function generate(_options: any): Rule {
     createNodeModel(types, _tree, _options.name);
     createPagination(_tree, _options.name);
     createNodeModelInterface(types, _tree, _options.name);
-    createApiGateway(_tree, _options.name, _options.graphqlFile);
-    createCognito(_tree, _options.name, _options.graphqlFile);
-    createIam(_tree, _options.name, _options.graphqlFile);
     createTFVar(_tree, _options.name, _options.graphqlFile);
 
     const templateSource = apply(url('./app'), [
@@ -140,7 +136,7 @@ export function generate(_options: any): Rule {
  * TODO : Return schema error | Return error if file not found
  * @returns types
  */
- function initTypes(graphqlSchema: string) {
+function initTypes(graphqlSchema: string) {
   const schemaCode = fs.readFileSync(
     path.join(__dirname, '../../../../', graphqlSchema),
     'utf8'

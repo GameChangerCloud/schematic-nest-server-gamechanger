@@ -7,18 +7,18 @@ export function createAppModule(
   _tree: Tree,
   projectName: string
 ) {
-    let entitiesModules = '';
-    let entitiesModulesImport = '';
-    types
-      .filter((type) => type.type === 'ObjectTypeDefinition' && type.isNotOperation())
-      .forEach((type) => {
-        entitiesModules += `
+  let entitiesModules = '';
+  let entitiesModulesImport = '';
+  types
+    .filter((type) => type.type === 'ObjectTypeDefinition' && type.isNotOperation())
+    .forEach((type) => {
+      entitiesModules += `
     ${type.typeName}Module,`;
-        entitiesModulesImport += `
+      entitiesModulesImport += `
 import { ${type.typeName}Module } from 'infrastructure/modules/${strings.camelize(type.typeName)}.module';`
-      });
-    
-    let fileTemplate = `import { Module } from '@nestjs/common';
+    });
+
+  let fileTemplate = `import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -45,7 +45,11 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: () => {
+<<<<<<< Updated upstream:src/generate/templates/src/app.module.ts
         if (true) {
+=======
+        if (process.env.DATABASE_HOST) {
+>>>>>>> Stashed changes:src/generate/templates/src/infrastructure/app.module.ts
           return {
             type: 'postgres',
             host: process.env.DATABASE_HOST,
@@ -81,9 +85,9 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
   ],
 })
 export class AppModule {}\n`;
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/app.module.ts`,
-      fileTemplate
-    );
+  // Create Service file
+  _tree.create(
+    `${projectName}/src/app.module.ts`,
+    fileTemplate
+  );
 }
