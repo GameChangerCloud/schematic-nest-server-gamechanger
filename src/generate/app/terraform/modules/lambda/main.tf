@@ -1,6 +1,6 @@
 resource "null_resource" "downsizing" {
   provisioner "local-exec" {
-    working_dir = "${path.module}/.."
+    working_dir = "${path.root}/.."
     command     = "npm prune --production"
     interpreter = ["bash", "-c"]
   }
@@ -8,7 +8,7 @@ resource "null_resource" "downsizing" {
 
 resource "null_resource" "nestbuild" {
   provisioner "local-exec" {
-    working_dir = "${path.module}/.."
+    working_dir = "${path.root}/.."
     command     = "nest build"
     interpreter = ["bash", "-c"]
   }
@@ -19,9 +19,9 @@ resource "null_resource" "nestbuild" {
 
 data "archive_file" "init" {
   type        = "zip"
-  source_dir  = "${path.module}/.."
+  source_dir  = "${path.root}/.."
   excludes    = ["terraform", ".aws-sam", "src"]
-  output_path = "${path.module}/lambda.zip"
+  output_path = "${path.root}/lambda.zip"
   depends_on = [
     null_resource.nestbuild
   ]
@@ -30,30 +30,33 @@ data "archive_file" "init" {
 
 resource "aws_lambda_function" "lambda" {
   source_code_hash = data.archive_file.init.output_base64sha256
-  function_name    = var.lambda_name
+  function_name    = "lambda-${var.graphql_name}-${var.timestamp}-${var.environment}"
   description      = "Nest Gamechanger Lamdba"
-  role             = aws_iam_role.instance.arn
+  role             = var.iam_role_arn
   handler          = "dist/index.handler"
   runtime          = "nodejs18.x"
   memory_size      = 256
   timeout          = 60
-  s3_bucket        = aws_s3_bucket.bucket.bucket
-  s3_key           = "lambda.zip"
+  s3_bucket        = var.s3_bucket
+  s3_key           = var.s3_key
 
   environment {
     variables = {
-      DATABASE_DB       = module.rds_aurora_postgresql.cluster_database_name
-      DATABASE_USER     = module.rds_aurora_postgresql.cluster_master_username
-      DATABASE_PORT     = module.rds_aurora_postgresql.cluster_port
-      DATABASE_HOST     = module.rds_aurora_postgresql.cluster_endpoint
-      DATABASE_PASSWORD = module.rds_aurora_postgresql.cluster_master_password
+      DATABASE_DB       = var.rds_database_name
+      DATABASE_USER     = var.rds_database_master_username
+      DATABASE_PORT     = var.rds_database_port
+      DATABASE_HOST     = var.rds_database_endpoint
+      DATABASE_PASSWORD = var.rds_database_master_password
     }
+  }
+
+  vpc_config {
+    subnet_ids         = var.subnet_ids
+    security_group_ids = var.security_group_ids
   }
 
   provisioner "local-exec" {
     command     = <<EOT
-                export arn=${module.rds_aurora_postgresql.cluster_arn}
-                export secretArn=${aws_secretsmanager_secret.example.arn}
                 rm -f final.yaml ../temp.yaml  
                 ( echo "cat <<EOF > ../template.yaml";
                   cat ../template.yaml;
@@ -62,6 +65,7 @@ resource "aws_lambda_function" "lambda" {
               EOT
     interpreter = ["bash", "-c"]
   }
+
   depends_on = [
     null_resource.nestbuild
   ]
@@ -69,7 +73,6 @@ resource "aws_lambda_function" "lambda" {
 }
 
 resource "aws_lambda_permission" "lambda_permission" {
-  depends_on    = [aws_api_gateway_deployment.myDeployement]
   statement_id  = "AllowMyDemoAPIInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda.function_name
@@ -77,6 +80,6 @@ resource "aws_lambda_permission" "lambda_permission" {
 
   # The /*/*/* part allows invocation from any stage, method and resource path
   # within API Gateway REST API.
-  source_arn = "${aws_api_gateway_rest_api.myAPI.execution_arn}/*/*/*"
+  source_arn = "${var.api_gateway_execution_arn}/*/*/*"
 }
 
