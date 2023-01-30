@@ -34,6 +34,12 @@ variable "s3_key" {
   default     = "lambda.zip"
 }
 
+variable "s3_id" {
+  description = "S3 bucket id"
+  type        = string
+  nullable = false
+}
+
 variable "rds_database_name" {
   description = "Name of the RDS database name"
   type        = string

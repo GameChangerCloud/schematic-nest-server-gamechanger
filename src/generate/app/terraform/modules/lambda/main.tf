@@ -21,10 +21,17 @@ data "archive_file" "init" {
   type        = "zip"
   source_dir  = "${path.root}/.."
   excludes    = ["terraform", ".aws-sam", "src"]
-  output_path = "${path.root}/lambda.zip"
+  output_path = "${path.root}/${var.s3_key}"
   depends_on = [
     null_resource.nestbuild
   ]
+}
+
+resource "aws_s3_bucket_object" "lambda" {
+  key                    = var.s3_key
+  bucket                 = var.s3_id
+  source                 = "${path.root}/../${var.s3_key}"
+  server_side_encryption = "aws:kms"
 }
 
 
@@ -67,7 +74,8 @@ resource "aws_lambda_function" "lambda" {
   }
 
   depends_on = [
-    null_resource.nestbuild
+    null_resource.nestbuild,
+    aws_s3_bucket_object.lambda
   ]
 
 }

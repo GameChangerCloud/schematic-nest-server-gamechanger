@@ -166,6 +166,7 @@ module "lambda" {
   }
 
   s3_bucket                    = module.s3.bucket
+  s3_id                        = module.s3.id
   subnet_ids                   = toset(module.vpc.subnet_ids)
   security_group_ids           = [module.sg_lambda.id]
   iam_role_arn                 = module.iam.role_arn
