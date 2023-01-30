@@ -40,3 +40,4 @@ schematics schematic-nest-server-gamechanger/:generate --dry-run=false
 You will then need to enter the name of the project you want to generate and the name and extension of the schema file as so :
 `nest-graphql-server`
 `employees.graphql`
+

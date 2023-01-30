@@ -19,7 +19,7 @@ import { createModule } from './templates/src/infrastructure/module';
 import { createServiceInterface } from './templates/src/domain/service.interface';
 import { createTypeOrmEntityFile } from './templates/src/adapters/typeorm/entities/entities.model';
 import { createTypeOrmEnumFile } from './templates/src/adapters/typeorm/entities/enum.model';
-import { createAppModule } from './templates/src/infrastructure/app.module';
+import { createAppModule } from './templates/src/app.module';
 import { createMutationsResolver } from './templates/src/infrastructure/resolvers/mutations.resolver';
 import { createFieldsResolver } from './templates/src/infrastructure/resolvers/fields.resolver';
 import { createQueriesResolver } from './templates/src/infrastructure/resolvers/queries.resolver';

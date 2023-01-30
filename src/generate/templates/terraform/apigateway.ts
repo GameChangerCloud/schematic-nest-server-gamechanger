@@ -8,7 +8,7 @@ export function createApiGateway(
 ) {
     const timeElapsed = Date.now();
     const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5).replaceAll(':', '-').replace('T', 't');
-    const graphqlName = path.parse(graphqlFileName).name;
+    const graphqlName = path.parse(graphqlFileName.toLocaleLowerCase()).name;
 
     let fileTemplate = 
 `resource "aws_api_gateway_rest_api" "myAPI" {
