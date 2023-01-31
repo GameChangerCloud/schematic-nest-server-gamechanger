@@ -27,7 +27,7 @@ data "archive_file" "init" {
   ]
 }
 
-resource "aws_s3_bucket_object" "lambda" {
+resource "aws_s3_object" "lambda" {
   key                    = var.s3_key
   bucket                 = var.s3_id
   source                 = "${path.root}/${var.s3_key}"
@@ -75,7 +75,7 @@ resource "aws_lambda_function" "lambda" {
 
   depends_on = [
     null_resource.nestbuild,
-    aws_s3_bucket_object.lambda
+    aws_s3_object.lambda
   ]
 
 }
