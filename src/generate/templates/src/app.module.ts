@@ -45,11 +45,7 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: () => {
-<<<<<<< Updated upstream:src/generate/templates/src/app.module.ts
-        if (true) {
-=======
         if (process.env.DATABASE_HOST) {
->>>>>>> Stashed changes:src/generate/templates/src/infrastructure/app.module.ts
           return {
             type: 'postgres',
             host: process.env.DATABASE_HOST,
