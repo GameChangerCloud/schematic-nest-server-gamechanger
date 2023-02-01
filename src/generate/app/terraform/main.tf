@@ -177,7 +177,7 @@ module "sg_lambda" {
 }
 
 module "iam_lambda" {
-  source = "./modules/iam_rds"
+  source = "./modules/iam_lambda"
 
   name         = "lambda"
   environment  = var.environment
