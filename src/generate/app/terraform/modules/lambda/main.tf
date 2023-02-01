@@ -32,6 +32,10 @@ resource "aws_s3_object" "lambda" {
   bucket                 = var.s3_id
   source                 = "${path.root}/${var.s3_key}"
   server_side_encryption = "aws:kms"
+  depends_on = [
+    null_resource.nestbuild,
+    data.archive_file.init
+  ]
 }
 
 

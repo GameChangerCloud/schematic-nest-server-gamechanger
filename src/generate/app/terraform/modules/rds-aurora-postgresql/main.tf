@@ -1,3 +1,8 @@
+resource "aws_db_subnet_group" "main" {
+  name       = "subnet-${var.graphql_name}-${var.timestamp}-${var.environment}"
+  subnet_ids = var.subnet_ids
+}
+
 resource "aws_rds_cluster" "postgresql" {
   cluster_identifier      = "aurora-db-${var.graphql_name}-${var.timestamp}-${var.environment}"
   engine                  = "aurora-postgresql"
@@ -10,6 +15,8 @@ resource "aws_rds_cluster" "postgresql" {
   backup_retention_period = 1
   storage_encrypted       = true
   skip_final_snapshot     = true
+  db_subnet_group_name    = aws_db_parameter_group.postgresql.name
+  vpc_security_group_ids  = var.security_group_ids
 
   serverlessv2_scaling_configuration {
     min_capacity = 1
@@ -25,15 +32,13 @@ resource "aws_rds_cluster" "postgresql" {
 }
 
 resource "aws_rds_cluster_instance" "postgresql" {
-  cluster_identifier = aws_rds_cluster.postgresql.id
-  instance_class     = "db.serverless"
-  identifier         = "db-${var.graphql_name}-${var.timestamp}-${var.environment}"
-  engine             = "aurora-postgresql"
-  engine_version     = "14.6"
-
-  # TODO: Add monitoring
-  # monitoring_role_arn = var.iam_role_arn
-  # monitoring_interval = 60
+  cluster_identifier  = aws_rds_cluster.postgresql.id
+  instance_class      = "db.serverless"
+  identifier          = "db-${var.graphql_name}-${var.timestamp}-${var.environment}"
+  engine              = "aurora-postgresql"
+  engine_version      = "14.6"
+  monitoring_role_arn = var.iam_role_arn
+  monitoring_interval = 30
 
   # Only use for Ippon AWS sandbox
   lifecycle {

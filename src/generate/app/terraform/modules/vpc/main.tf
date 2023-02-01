@@ -3,7 +3,10 @@ resource "aws_vpc" "vpc" {
   enable_dns_support   = true
   cidr_block           = var.cidr_block
 
-  tags = var.tags
+  tags = merge(
+    { "Name" = "vpc-${var.graphql_name}-${var.timestamp}-${var.environment}" },
+    var.tags
+  )
 
   # Only use for Ippon AWS sandbox
   lifecycle {
@@ -17,8 +20,10 @@ resource "aws_subnet" "private" {
   cidr_block        = cidrsubnet(var.cidr_block, 8, count.index + 1)
   availability_zone = var.availability_zones[count.index]
 
-  tags = var.tags
-
+  tags = merge(
+    { "Name" = "subnet${count.index}-${var.graphql_name}-${var.timestamp}-${var.environment}" },
+    var.tags
+  )
   # Only use for Ippon AWS sandbox
   lifecycle {
     ignore_changes = [tags, tags_all]

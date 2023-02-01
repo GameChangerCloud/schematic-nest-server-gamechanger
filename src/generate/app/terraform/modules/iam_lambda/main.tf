@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "rds" {
+data "aws_iam_policy_document" "lambda" {
   statement {
     effect = "Allow"
     actions = [
@@ -10,48 +10,28 @@ data "aws_iam_policy_document" "rds" {
   }
 
   statement {
-    effect    = "Allow"
-    actions   = ["rds-data:*"]
-    resources = ["*"]
-  }
-
-  statement {
-    effect    = "Allow"
-    actions   = ["secretsmanager:GetSecretValue"]
-    resources = [var.aws_secrets]
-  }
-
-  statement {
     effect = "Allow"
     actions = [
-      "ec2:CreateNetworkInterface",
-      "ec2:CreateNetworkInterfacePermission",
       "ec2:DescribeNetworkInterfaces",
-      "ec2:DescribeNetworkInterface",
       "ec2:DeleteNetworkInterface",
-      "ec2:DeleteNetworkInterfaces"
+      "ec2:CreateNetworkInterfacePermission",
+      "ec2:CreateNetworkInterface",
     ]
     resources = ["*"]
-  }
-
-  statement {
-    effect    = "Allow"
-    actions   = ["rds-db:connect"]
-    resources = ["arn:aws:rds-db:us-east-2:1234567890:dbuser:db-ABCDEFGHIJKL01234/db_user"]
   }
 }
 
 resource "aws_iam_policy" "main" {
-  name        = "policy-${var.graphql_name}-${var.timestamp}-${var.environment}"
+  name        = "policy-${var.name}-${var.graphql_name}-${var.timestamp}-${var.environment}"
   path        = "/"
   description = "Policy for ${var.graphql_name}-${var.timestamp}"
-  policy      = data.aws_iam_policy_document.rds.json
+  policy      = data.aws_iam_policy_document.lambda.json
 
   tags = var.tags
 }
 
 resource "aws_iam_role" "main" {
-  name               = "role-${var.graphql_name}-${var.timestamp}-${var.environment}"
+  name               = "role-${var.name}-${var.graphql_name}-${var.timestamp}-${var.environment}"
   description        = "Role for ${var.graphql_name}-${var.timestamp}"
   assume_role_policy = <<EOF
   {

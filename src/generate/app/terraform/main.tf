@@ -78,6 +78,9 @@ module "vpc" {
   tags = local.tags
 }
 
+###################
+####### RDS  ######
+###################
 module "sg_rds" {
   source = "./modules/security_group"
 
@@ -86,48 +89,31 @@ module "sg_rds" {
   timestamp    = var.timestamp
   vpc_id       = module.vpc.id
   ingress = {
-    "rdsToLambda" = {
+    "LambdaToRdsSg" = {
       from_port                = 0
-      to_port                  = 5432
-      protocol                 = "TCP"
+      to_port                  = 0
+      protocol                 = "-1"
       source_security_group_id = module.sg_lambda.id
       description              = "Allow lambda to communicate to RDS"
     }
   }
   egress = {
-    "rdsToLambda" = {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "Allow lambda to communicate to RDS"
+    "RdsToLambdaSg" = {
+      from_port                = 0
+      to_port                  = 0
+      protocol                 = "-1"
+      source_security_group_id = module.sg_lambda.id
+      description              = "Allow lambda to communicate to RDS"
     }
   }
 
   tags = local.tags
 }
 
-module "sg_lambda" {
-  source = "./modules/security_group"
+module "iam_rds" {
+  source = "./modules/iam_rds"
 
-  environment  = var.environment
-  graphql_name = "${var.graphql_name}-lambda"
-  timestamp    = var.timestamp
-  vpc_id       = module.vpc.id
-  egress = {
-    "lambdaToAll" = {
-      from_port   = 0
-      to_port     = 0
-      protocol    = "-1"
-      description = "Allow lambda to communicate over VPC"
-    }
-  }
-
-  tags = local.tags
-}
-
-module "iam" {
-  source = "./modules/iam"
-
+  name         = "rds"
   environment  = var.environment
   graphql_name = var.graphql_name
   timestamp    = var.timestamp
@@ -141,7 +127,7 @@ module "rds" {
 
   subnet_ids         = module.vpc.subnet_ids
   security_group_ids = [module.sg_rds.id]
-  iam_role_arn       = module.iam.role_arn
+  iam_role_arn       = module.iam_rds.role_arn
 
   environment        = var.environment
   graphql_name       = var.graphql_name
@@ -158,6 +144,49 @@ module "rds" {
   tags = local.tags
 }
 
+###################
+##### Lambda  #####
+###################
+module "sg_lambda" {
+  source = "./modules/security_group"
+
+  environment  = var.environment
+  graphql_name = "${var.graphql_name}-lambda"
+  timestamp    = var.timestamp
+  vpc_id       = module.vpc.id
+  ingress = {
+    "RdsToLambdaSg" = {
+      from_port                = 0
+      to_port                  = 0
+      protocol                 = "-1"
+      source_security_group_id = module.sg_rds.id
+      description              = "Allow lambda to communicate to RDS"
+    }
+  }
+  egress = {
+    "LambdaToRdsSg" = {
+      from_port                = 0
+      to_port                  = 0
+      protocol                 = "-1"
+      source_security_group_id = module.sg_rds.id
+      description              = "Allow lambda to communicate to RDS"
+    }
+  }
+
+  tags = local.tags
+}
+
+module "iam_lambda" {
+  source = "./modules/iam_rds"
+
+  name         = "lambda"
+  environment  = var.environment
+  graphql_name = var.graphql_name
+  timestamp    = var.timestamp
+  aws_secrets  = aws_secretsmanager_secret.postgresql.arn
+
+  tags = local.tags
+}
 
 module "lambda" {
   source = "./modules/lambda"
@@ -169,7 +198,7 @@ module "lambda" {
   s3_id                        = module.s3.id
   subnet_ids                   = toset(module.vpc.subnet_ids)
   security_group_ids           = [module.sg_lambda.id]
-  iam_role_arn                 = module.iam.role_arn
+  iam_role_arn                 = module.iam_lambda.role_arn
   rds_database_name            = module.rds.cluster_database_name
   rds_database_port            = module.rds.cluster_port
   rds_database_endpoint        = module.rds.cluster_proxy_endpoint

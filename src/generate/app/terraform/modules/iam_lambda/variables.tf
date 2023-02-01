@@ -22,8 +22,14 @@ variable "tags" {
   nullable    = false
 }
 
+variable "name" {
+  description = "Name of the policy to inject"
+  type        = string
+  nullable    = false
+}
+
 variable "aws_secrets" {
-  description = "Secrets for "
+  description = "Secrets"
   type        = string
   nullable    = false
 }
