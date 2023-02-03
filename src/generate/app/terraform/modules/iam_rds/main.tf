@@ -17,6 +17,12 @@ data "aws_iam_policy_document" "rds" {
 
   statement {
     effect    = "Allow"
+    actions   = ["rds-db:connect"]
+    resources = ["*"]
+  }
+
+  statement {
+    effect    = "Allow"
     actions   = ["kms:Decrypt"]
     resources = ["*"]
   }
@@ -24,19 +30,20 @@ data "aws_iam_policy_document" "rds" {
   statement {
     effect = "Allow"
     actions = [
-      "secretsmanager:GetSecretValue",
       "secretsmanager:GetResourcePolicy",
+      "secretsmanager:GetSecretValue",
       "secretsmanager:DescribeSecret",
-      "secretsmanager:GetRandomPassword",
-      "secretsmanager:ListSecrets",
       "secretsmanager:ListSecretVersionIds"
     ]
     resources = [var.aws_secrets]
   }
 
   statement {
-    effect    = "Allow"
-    actions   = ["rds-db:connect"]
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetRandomPassword",
+      "secretsmanager:ListSecrets"
+    ]
     resources = ["*"]
   }
 }

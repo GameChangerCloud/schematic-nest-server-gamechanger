@@ -42,10 +42,8 @@ resource "aws_rds_cluster_instance" "postgresql" {
   engine               = "aurora-postgresql"
   engine_version       = "14.6"
   db_subnet_group_name = "sngrp-${var.graphql_name}-${var.timestamp}-${var.environment}"
-
-  # TODO: Configure ARN for monitoring
-  # monitoring_role_arn  = var.iam_role_arn
-  # monitoring_interval  = 30
+  debug_logging        = true
+  require_tls          = false
 
   # Only use for Ippon AWS sandbox
   lifecycle {

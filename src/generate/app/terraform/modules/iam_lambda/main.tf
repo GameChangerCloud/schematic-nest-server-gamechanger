@@ -19,6 +19,12 @@ data "aws_iam_policy_document" "lambda" {
     ]
     resources = ["*"]
   }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["rds-db:connect"]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_policy" "main" {

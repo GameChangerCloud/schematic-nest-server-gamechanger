@@ -24,6 +24,23 @@ resource "aws_subnet" "private" {
     { "Name" = "subnet${count.index}-${var.graphql_name}-${var.timestamp}-${var.environment}" },
     var.tags
   )
+
+  # Only use for Ippon AWS sandbox
+  lifecycle {
+    ignore_changes = [tags, tags_all]
+  }
+}
+
+
+resource "aws_vpc_endpoint" "rds" {
+  vpc_id       = aws_vpc.vpc.id
+  service_name = "com.amazonaws.${var.region}.rds"
+
+  tags = merge(
+    { "Name" = "endpoint-${var.graphql_name}-${var.timestamp}-${var.environment}" },
+    var.tags
+  )
+
   # Only use for Ippon AWS sandbox
   lifecycle {
     ignore_changes = [tags, tags_all]

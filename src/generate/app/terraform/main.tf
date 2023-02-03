@@ -28,6 +28,27 @@ resource "aws_secretsmanager_secret_version" "postgresql" {
   secret_string = "{\"username\":\"${var.db_username}\",\"password\":\"${var.db_password}\"}"
 }
 
+resource "aws_vpc_endpoint" "rds" {
+  vpc_id              = module.vpc.id
+  service_name        = "com.amazonaws.${var.region}.rds"
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  security_group_ids = [
+    module.sg_lambda.id,
+    module.sg_rds.id
+  ]
+  subnet_ids = module.vpc.subnet_ids
+
+  tags = merge(
+    { "Name" = "endpoint-${var.graphql_name}-${var.timestamp}-${var.environment}" },
+    local.tags
+  )
+
+  # Only use for Ippon AWS sandbox
+  lifecycle {
+    ignore_changes = [tags, tags_all]
+  }
+}
 
 ######################################################
 ###################### MODULES #######################
