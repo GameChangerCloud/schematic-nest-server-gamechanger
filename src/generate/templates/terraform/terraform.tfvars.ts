@@ -8,7 +8,7 @@ export function createTFVar(
 ) {
   const timeElapsed = Date.now();
   const nowISOFormat = new Date(timeElapsed).toISOString().slice(0, -5).replaceAll(':', '-').replace('T', 't');
-  const graphqlName = path.parse(graphqlFileName).name;
+  const graphqlName = path.parse(graphqlFileName).name.toLowerCase();
 
   let fileTemplate =
     `db_username = "postgres"

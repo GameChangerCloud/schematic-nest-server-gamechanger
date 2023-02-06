@@ -1,5 +1,0 @@
-db_username  = "postgres"
-db_password  = "postgres"
-graphql_name = "movies"
-timestamp    = "2023-01-30t11-11-11-db"
-environment  = "dev"
