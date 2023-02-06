@@ -1,3 +1,0 @@
-/**
- * ENTITIES FIELD GENERATION
- */

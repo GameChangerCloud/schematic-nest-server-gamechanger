@@ -29,7 +29,6 @@ terraform apply -var-file="terraform.tfvar"
 ```
 
 >Make sure to set your region as the value of AWS_DEFAULT_REGION
-{: .prompt-tip }
 
 Once the apply is complete, you should be able to see the generated Lambda and RDS base on the AWS console.
 You can then pass queries to the Lambda through the Test tab.
@@ -83,7 +82,6 @@ Each time you modify the files you have to build your project and run a sam buil
 ```bash
 nest build
 sam build
-
 ```
 
 Then, you can call sam to send your query to the lambda function.
