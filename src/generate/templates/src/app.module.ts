@@ -34,7 +34,7 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
       debug: true,
       playground: false,
       autoSchemaFile: () => {
-        if (true) {
+        if (process.env.DATABASE_HOST) {
           return path.join(__dirname, '../schema.gql')
         } else {
           return path.join(__dirname, 'schema.gql')
