@@ -34,8 +34,7 @@ resource "aws_vpc_endpoint" "rds" {
   vpc_endpoint_type   = "Interface"
   private_dns_enabled = true
   security_group_ids = [
-    module.sg_lambda.id,
-    module.sg_rds.id
+    module.sg.id
   ]
   subnet_ids = module.vpc.subnet_ids
 
@@ -99,10 +98,7 @@ module "vpc" {
   tags = local.tags
 }
 
-###################
-####### RDS  ######
-###################
-module "sg_rds" {
+module "sg" {
   source = "./modules/security_group"
 
   environment  = var.environment
@@ -114,8 +110,8 @@ module "sg_rds" {
       from_port                = 0
       to_port                  = 0
       protocol                 = "-1"
-      source_security_group_id = module.sg_lambda.id
-      description              = "Allow lambda to communicate to RDS"
+      source_security_group_id = module.sg.id
+      description              = "Allow all trafic inside VPC"
     }
   }
   egress = {
@@ -123,14 +119,17 @@ module "sg_rds" {
       from_port                = 0
       to_port                  = 0
       protocol                 = "-1"
-      source_security_group_id = module.sg_lambda.id
-      description              = "Allow lambda to communicate to RDS"
+      source_security_group_id = module.sg.id
+      description              = "Allow all trafic inside VPC"
     }
   }
 
   tags = local.tags
 }
 
+###################
+####### RDS  ######
+###################
 module "iam_rds" {
   source = "./modules/iam_rds"
 
@@ -147,7 +146,7 @@ module "rds" {
   source = "./modules/rds-aurora-postgresql"
 
   subnet_ids         = module.vpc.subnet_ids
-  security_group_ids = [module.sg_rds.id]
+  security_group_ids = [module.sg.id]
   iam_role_arn       = module.iam_rds.role_arn
 
   environment        = var.environment
@@ -168,35 +167,6 @@ module "rds" {
 ###################
 ##### Lambda  #####
 ###################
-module "sg_lambda" {
-  source = "./modules/security_group"
-
-  environment  = var.environment
-  graphql_name = "${var.graphql_name}-lambda"
-  timestamp    = var.timestamp
-  vpc_id       = module.vpc.id
-  ingress = {
-    "RdsToLambdaSg" = {
-      from_port                = 0
-      to_port                  = 0
-      protocol                 = "-1"
-      source_security_group_id = module.sg_rds.id
-      description              = "Allow lambda to communicate to RDS"
-    }
-  }
-  egress = {
-    "LambdaToRdsSg" = {
-      from_port                = 0
-      to_port                  = 0
-      protocol                 = "-1"
-      source_security_group_id = module.sg_rds.id
-      description              = "Allow lambda to communicate to RDS"
-    }
-  }
-
-  tags = local.tags
-}
-
 module "iam_lambda" {
   source = "./modules/iam_lambda"
 
@@ -218,7 +188,7 @@ module "lambda" {
   s3_bucket                    = module.s3.bucket
   s3_id                        = module.s3.id
   subnet_ids                   = toset(module.vpc.subnet_ids)
-  security_group_ids           = [module.sg_lambda.id]
+  security_group_ids           = [module.sg.id]
   iam_role_arn                 = module.iam_lambda.role_arn
   rds_database_name            = module.rds.cluster_database_name
   rds_database_port            = module.rds.cluster_port

@@ -42,8 +42,6 @@ resource "aws_rds_cluster_instance" "postgresql" {
   engine               = "aurora-postgresql"
   engine_version       = "14.6"
   db_subnet_group_name = "sngrp-${var.graphql_name}-${var.timestamp}-${var.environment}"
-  debug_logging        = true
-  require_tls          = false
 
   # Only use for Ippon AWS sandbox
   lifecycle {
@@ -67,13 +65,13 @@ resource "aws_rds_cluster_parameter_group" "postgresql" {
 resource "aws_db_proxy" "postgresql" {
   count                  = var.use_proxy ? 1 : 0
   name                   = "db-${var.graphql_name}-${var.timestamp}-${var.environment}"
-  debug_logging          = false
   engine_family          = "POSTGRESQL"
   idle_client_timeout    = 1800
-  require_tls            = true
   role_arn               = var.iam_role_arn
   vpc_security_group_ids = var.security_group_ids
   vpc_subnet_ids         = var.subnet_ids
+  debug_logging          = true
+  require_tls            = false
 
   auth {
     description = "Disbaled IAM auth and use login password for authentification"

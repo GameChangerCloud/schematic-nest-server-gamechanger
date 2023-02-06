@@ -33,8 +33,9 @@ resource "aws_subnet" "private" {
 
 
 resource "aws_vpc_endpoint" "rds" {
-  vpc_id       = aws_vpc.vpc.id
-  service_name = "com.amazonaws.${var.region}.rds"
+  vpc_id            = aws_vpc.vpc.id
+  service_name      = "com.amazonaws.${var.region}.rds"
+  vpc_endpoint_type = "Interface"
 
   tags = merge(
     { "Name" = "endpoint-${var.graphql_name}-${var.timestamp}-${var.environment}" },
