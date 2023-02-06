@@ -162,6 +162,10 @@ module "rds" {
   secret_arn         = aws_secretsmanager_secret.postgresql.arn
 
   tags = local.tags
+
+  depends_on = [
+    module.vpc
+  ]
 }
 
 ###################
@@ -202,4 +206,8 @@ module "lambda" {
   timestamp    = var.timestamp
 
   tags = local.tags
+
+  depends_on = [
+    module.vpc
+  ]
 }
