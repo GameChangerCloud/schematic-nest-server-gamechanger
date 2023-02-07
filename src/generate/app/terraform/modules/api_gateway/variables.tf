@@ -2,7 +2,6 @@ variable "environment" {
   description = "Target Environment name"
   type        = string
   nullable    = false
-  default = "dev"
 }
 
 variable "graphql_name" {
@@ -17,19 +16,20 @@ variable "timestamp" {
   nullable    = false
 }
 
-variable "region" {
-  description = "Target AWS region name"
+variable "tags" {
+  description = "Tags for ressources"
+  type        = map(any)
+  nullable    = false
+}
+
+variable "cognito_arn" {
+  description = "Cognito arn"
   type        = string
   nullable    = false
-  default = "eu-west-1"
 }
 
-variable "db_username" {
-  description = "Username for RDS database"
+variable "lambda_invoke_arn" {
+  description = "Lambda invoke arn"
   type        = string
-}
-
-variable "db_password" {
-  description = "Password for RDS database"
-  type        = string
+  nullable    = false
 }

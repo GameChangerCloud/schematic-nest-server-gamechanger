@@ -2,7 +2,6 @@ variable "environment" {
   description = "Target Environment name"
   type        = string
   nullable    = false
-  default = "dev"
 }
 
 variable "graphql_name" {
@@ -21,15 +20,23 @@ variable "region" {
   description = "Target AWS region name"
   type        = string
   nullable    = false
-  default = "eu-west-1"
+  default     = "eu-west-1"
 }
 
-variable "db_username" {
-  description = "Username for RDS database"
-  type        = string
+variable "tags" {
+  description = "Tags for ressources"
+  type        = map(any)
+  nullable    = false
 }
 
-variable "db_password" {
-  description = "Password for RDS database"
+variable "cidr_block" {
+  description = "CIDR block of vpc"
   type        = string
+  nullable    = false
+}
+
+variable "availability_zones" {
+  description = "All availability zone of current region"
+  type        = list(string)
+  nullable    = false
 }

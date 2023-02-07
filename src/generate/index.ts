@@ -1,7 +1,9 @@
 import { strings } from '@angular-devkit/core';
-import { apply, chain, mergeWith, move, Rule, SchematicContext, 
+import {
+  apply, chain, mergeWith, move, Rule, SchematicContext,
   // SchematicsException, 
-  template, Tree, url } from '@angular-devkit/schematics';
+  template, Tree, url
+} from '@angular-devkit/schematics';
 import {
   schemaParser,
   getRelations,
@@ -19,7 +21,7 @@ import { createModule } from './templates/src/infrastructure/module';
 import { createServiceInterface } from './templates/src/domain/service.interface';
 import { createTypeOrmEntityFile } from './templates/src/adapters/typeorm/entities/entities.model';
 import { createTypeOrmEnumFile } from './templates/src/adapters/typeorm/entities/enum.model';
-import { createAppModule } from './templates/src/infrastructure/app.module';
+import { createAppModule } from './templates/src/app.module';
 import { createMutationsResolver } from './templates/src/infrastructure/resolvers/mutations.resolver';
 import { createFieldsResolver } from './templates/src/infrastructure/resolvers/fields.resolver';
 import { createQueriesResolver } from './templates/src/infrastructure/resolvers/queries.resolver';
@@ -34,10 +36,7 @@ import { createYogaDriver } from './templates/src/graphql-yoga-driver';
 import { createCredentials } from './templates/src/credentials';
 import { createPagination } from './templates/src/application/services/dto/pagination.dto';
 import { createIndex } from './templates/src/index';
-import { createApiGateway } from './templates/terraform/apigateway';
-import { createCognito } from './templates/terraform/cognito';
-import { createIam } from './templates/terraform/iam';
-import { createTFVar } from './templates/terraform/terraform.tfvar';
+import { createTFVar } from './templates/terraform/terraform.tfvars';
 const fs = require('fs');
 const path = require('path');
 
@@ -66,8 +65,8 @@ export function generate(_options: any): Rule {
      * INIT GAMECHANGER TYPES
      */
 
-    let types = initTypes(_options["graphql-file"]);
-    
+    let types = initTypes(_options.graphqlFile);
+
 
     /**
      * NEST SERVER GENERATION
@@ -93,7 +92,7 @@ export function generate(_options: any): Rule {
           });
         }
         createService(types, type, _tree, _options.name);
-        createTypeOrmEntityFile(type,types, _tree, _options.name);
+        createTypeOrmEntityFile(type, types, _tree, _options.name);
         createDomainModelInterfaceFile(types, type, _tree, _options.name);
         createMutationsResolver(type, _tree, _options.name);
         createQueriesResolver(type, _tree, _options.name);
@@ -113,10 +112,8 @@ export function generate(_options: any): Rule {
     createNodeModel(types, _tree, _options.name);
     createPagination(_tree, _options.name);
     createNodeModelInterface(types, _tree, _options.name);
-    createApiGateway(_tree, _options.name,_options["graphql-file"]);
-    createCognito(_tree, _options.name, _options["graphql-file"]);
-    createIam(_tree, _options.name, _options["graphql-file"]);
-    createTFVar(_tree, _options.name, _options["graphql-file"]);
+    createTFVar(_tree, _options.name, _options.graphqlFile);
+
 
     const templateSource = apply(url('./app'), [
       template({
@@ -141,7 +138,7 @@ export function generate(_options: any): Rule {
  * TODO : Return schema error | Return error if file not found
  * @returns types
  */
- function initTypes(graphqlSchema: string) {
+function initTypes(graphqlSchema: string) {
   const schemaCode = fs.readFileSync(
     path.join(__dirname, '../../../../', graphqlSchema),
     'utf8'

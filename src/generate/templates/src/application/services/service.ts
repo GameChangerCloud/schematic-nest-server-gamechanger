@@ -329,7 +329,7 @@ function handleIdGeneration(type: Type): string[] {
   const idField = type.fields.find((field => field.type === 'ID'));
   if (!idField) {
     importUUID += `import { v4 as uuidv4 } from 'uuid';\n`
-    idTemplate += `\n    studio.id = uuidv4();`;
+    idTemplate += `\n    ${strings.camelize(type.typeName)}.id = uuidv4();`;
   }
   return [importUUID, idTemplate]
 }

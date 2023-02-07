@@ -55,7 +55,6 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.7",
     "source-map-support": "^0.5.20",
-    "typeorm": "0.3.6",
-    "typeorm-aurora-data-api-driver": "^2.4.4"
+    "typeorm": "0.3.6"
   }
 }
