@@ -59,7 +59,8 @@ export function generate(_options: any): Rule {
     // if(!_options.gqlFilePath){
     //   throw new SchematicsException('GCL schema File path is required.');
     // }
-
+    console.log(_options);
+    
     /**
      * INIT GAMECHANGER TYPES
      */
@@ -112,6 +113,7 @@ export function generate(_options: any): Rule {
     createPagination(_tree, _options.name);
     createNodeModelInterface(types, _tree, _options.name);
     createTFVar(_tree, _options.name, _options.graphqlFile);
+
 
     const templateSource = apply(url('./app'), [
       template({
