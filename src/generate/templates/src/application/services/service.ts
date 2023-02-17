@@ -146,7 +146,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
     if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids && input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length > 0) {
       for (let i = 0; i < input.${strings.camelize(pluralize(relationship.name, 1))}Ids.length; i++) {
         if (input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i] !== ${strings.camelize(type.typeName)}.id) {
-          const child${strings.capitalize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
+          const child${strings.capitalize(relationship.type)} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
             where: { id: input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i] },
           });
           ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))}[i].id = child${strings.capitalize(relationship.type)}.id;
