@@ -8,6 +8,7 @@ import {
   schemaParser,
   getRelations,
   typesGenerator,
+  Type,
 } from 'easygraphql-parser-gamechanger';
 
 import { createCreateDto } from './templates/src/application/services/dto/create.dto';
@@ -59,8 +60,6 @@ export function generate(_options: any): Rule {
     // if(!_options.gqlFilePath){
     //   throw new SchematicsException('GCL schema File path is required.');
     // }
-    console.log(_options);
-    console.log(_options['graphql-file']);
     
     /**
      * INIT GAMECHANGER TYPES
@@ -85,7 +84,11 @@ export function generate(_options: any): Rule {
         createUpdateDto(types, type, _tree, _options.name);
         createEntityPaginationDto(type, _tree, _options.name);
         const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.relationType);
-        if (relatedFields.length > 0) createFieldsResolver(type, relatedFields, _tree, _options.name);
+        if (relatedFields.length > 0) createFieldsResolver(types, type, _tree, _options.name);
+        if (type.relationList.length == 0 
+          && type.type === 'ObjectTypeDefinition'
+          && computeManyOnlyRelationship(types, type)) createFieldsResolver(types, type, _tree, _options.name);
+        
         const relatedFieldsArray = relatedFields.filter((field) => field.isArray);
         if (relatedFieldsArray.length > 0) {
           relatedFieldsArray.forEach((relatedField: Field) => {
@@ -146,6 +149,26 @@ function initTypes(graphqlSchema: string) {
   );
 
   return getRelations(typesGenerator(schemaParser(schemaCode)));
+}
+
+/**
+ * // Eligible types for field resolver generation through this function are 
+  // those which do not have defined relationships otherwise the generation 
+  // of the resolver would happen twice
+ * @param types 
+ * @param manyOnlyType 
+ * @returns whether the processed type is concerned in a manyOnly Relationship
+ */
+function computeManyOnlyRelationship(types: Type[], manyOnlyType: Type) : boolean {
+  let generateFieldsResolver = false;
+  if (manyOnlyType.relationList.length == 0 && manyOnlyType.type === 'ObjectTypeDefinition')
+  types.forEach((type: Type) => {
+    const fieldInRelatedType = type.fields.find((field) => field.type === manyOnlyType.typeName)
+    if (fieldInRelatedType && fieldInRelatedType.relationType === 'manyOnly') {
+      generateFieldsResolver = true;
+    }
+  });
+  return generateFieldsResolver;
 }
 
 
