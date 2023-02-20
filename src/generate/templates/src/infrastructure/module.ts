@@ -32,7 +32,7 @@ import { ${type.typeName}QueriesResolver } from 'infrastructure/resolvers/${stri
     ${type.typeName}MutationsResolver,
     ${type.typeName}QueriesResolver,${fieldsResolver}
   ],
-    exports: [${type.typeName}Service],
+  exports: [${type.typeName}Service],
 })
 export class ${type.typeName}Module {}
 `;

@@ -63,7 +63,7 @@ function computeFieldPagination(type: Type): string[] {
   ${strings.camelize(type.typeName)}${strings.capitalize(relatedField.name)}Pagination(
     ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'],
     args: PaginationArgs,
-  ): Promise<${type.typeName}${strings.capitalize(relatedField.name)}Pagination>`;
+  ): Promise<${type.typeName}${strings.capitalize(relatedField.name)}Pagination>;`;
     importFieldPagination += `
 import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } from 'application/services/dto/${strings.camelize(type.typeName)}/${strings.camelize(type.typeName)}-${relatedField.name}-pagination.dto';`;
     });

@@ -32,7 +32,7 @@ export class ${type.typeName}MutationsResolver {
 
   @Mutation(() => ${type.typeName}UpdateOutput)
   async ${strings.camelize(type.typeName)}Update(
-    @Args({ name: '${strings.camelize(type.typeName)}Id', type: () => ID })${strings.camelize(type.typeName)}Id: ${type.typeName}['id'],
+    @Args({ name: '${strings.camelize(type.typeName)}Id', type: () => ID }) ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'],
     @Args('input') input: ${type.typeName}UpdateInput,
   ) {
     return this.${strings.camelize(pluralize(type.typeName))}Service.${strings.camelize(type.typeName)}Update(${strings.camelize(type.typeName)}Id, input);
