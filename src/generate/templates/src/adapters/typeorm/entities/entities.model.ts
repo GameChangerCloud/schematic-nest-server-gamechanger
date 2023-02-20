@@ -30,7 +30,6 @@ export class ${typeName} extends Node implements ${typeName}Model {${generateEnt
 }
 `;
 
-  // Create Service file
   _tree.create(
     `${projectName}/src/adapters/typeorm/entities/${strings.decamelize(
       type.typeName
@@ -79,7 +78,6 @@ function generateTypeOrmRelationsImportTemplate(type: Type, types: Type[]): stri
       }
     }
   });
-  console.log(` A : ${type.typeName}`);
   if (computeManyOnlyRelationships(types, type)[0]) relationshipsToImport.push('ManyToOne');
   relationshipsToImport = relationshipsToImport.filter((item, index) => relationshipsToImport.indexOf(item) === index);
   return relationshipsToImport.join(',\n  ') + ',\n';
@@ -139,7 +137,6 @@ function generateEntityRelationsModelImportsTemplate(
       relation: 'oneOnly' | 'oneToOne' | 'selfJoinOne' | 'oneToMany' | 'manyToOne' | 'manyOnly' | 'selfJoinMany' | 'manyToMany' | 'oneToOneJoin' | 'manyToManyJoin';
       type: string;
     }) => {
-      console.log(manyOnlyRelationships);
       if (relation.type !== processedType.typeName && !manyOnlyRelationships.includes(relation.type)) {
         let relatedType = types.find(type => type.typeName === relation.type);
         let importType = relatedType?.type === 'EnumTypeDefinition' ? 'enum' : 'model';
@@ -216,7 +213,7 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
 
       field.relation && !field.isEnum ?
         fieldTemplate += `\n  @${getTypeOrmRelation(field.relationType)}(() => ${strings.capitalize(field.type)}${singleRelation} ${relationDeleteOption})${getJoinInstructions(type, field, relatedFieldName)}
-  ${field.name}: ${field.type}${arrayCharacter};\n
+  ${field.name}${nullField}: ${field.type}${arrayCharacter};\n
   @RelationId((self: ${type.typeName}) => self.${field.name})
   readonly ${strings.camelize(pluralize(field.name, 1))}Id${pluralFieldName}${nullField}: ${field.type}['id']${arrayCharacter}${nullType};\n`
         :
@@ -227,15 +224,16 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
       entityFieldsTemplate += fieldTemplate
 
     } else if (field.relationType === 'selfJoinMany') {
+
       entityFieldsTemplate += `\n  @ManyToOne(() => ${field.type}, (${strings.camelize(field.type)}) => ${strings.camelize(field.type)}.child${strings.capitalize(pluralize(field.name))}, {
     onDelete: 'SET NULL',
   })
-  parent${strings.capitalize(pluralize(field.name, 1))}: ${field.type};
+  parent${strings.capitalize(pluralize(field.name, 1))}${field.noNull ? '' : '?'}: ${field.type};
 
   @OneToMany(() => ${field.type}, (${strings.camelize(field.type)}) => ${strings.camelize(field.type)}.parent${strings.capitalize(pluralize(field.name, 1))}, {
     onDelete: 'SET NULL',
   })
-  child${strings.capitalize(pluralize(field.name))}: ${field.type}[];\n
+  child${strings.capitalize(pluralize(field.name))}${field.noNull ? '' : '?'}: ${field.type}[];\n
   @RelationId((self: ${type.typeName}) => self.child${strings.capitalize(pluralize(field.name))})
   readonly child${strings.capitalize(pluralize(field.name, 1))}Ids?: ${field.type}['id'][] | null;\n`
     }

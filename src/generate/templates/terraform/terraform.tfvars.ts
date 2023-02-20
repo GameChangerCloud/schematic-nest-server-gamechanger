@@ -16,7 +16,7 @@ db_password = "postgres"
 graphql_name = "${graphqlName}"
 timestamp = "${nowISOFormat}"\n`;
 
-  // Create Service file
+
   _tree.create(
     `${projectName}/terraform/terraform.tfvars`,
     fileTemplate

@@ -18,7 +18,7 @@ export function createUpdateDto(
 import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';${importTemplate}${validatorsImportTemplate}
 
 @InputType('${type.typeName}UpdateInput')
-export class ${type.typeName}UpdateInput {\n
+export class ${type.typeName}UpdateInput {
 ${stdScalarsTemplate}${stdRelationshipsTemplate}}
 
 @ObjectType('${type.typeName}UpdateOutput')
@@ -28,15 +28,14 @@ export class ${type.typeName}UpdateOutput {
 }
 `;
 
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/application/services/dto/${strings.camelize(
-        type.typeName
-      )}/${strings.camelize(
-        type.typeName
-      )}-update.dto.ts`,
-      fileTemplate
-    );
+  _tree.create(
+    `${projectName}/src/application/services/dto/${strings.camelize(
+      type.typeName
+    )}/${strings.camelize(
+      type.typeName
+    )}-update.dto.ts`,
+    fileTemplate
+  );
 }
 
 function computeImportsTemplate(types: Type[], type: Type): string {
@@ -153,7 +152,6 @@ function computeManyOnlyRelationships(types: Type[], manyOnlyType: Type): string
 
 function computeFieldDirective(scalar: Field, scalarType: string, validatorsToImport: string[]): [string, string[]] {
   let directiveTemplate = getTypeValidators(scalar);
-  console.log()
   if (scalarType === 'String') {
     const lengthDirective = scalar.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === 'length');
     if (lengthDirective) {

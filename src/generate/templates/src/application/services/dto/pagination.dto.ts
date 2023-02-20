@@ -51,9 +51,9 @@ export abstract class Pagination<N extends Node = Node> {
   abstract nodes: N[];
 }\n`;
 
-// Create Service file
-    _tree.create(
-    `${projectName}/src/application/services/dto/pagination/pagination.dto.ts`,
-    fileTemplate
-    );
+
+  _tree.create(
+  `${projectName}/src/application/services/dto/pagination/pagination.dto.ts`,
+  fileTemplate
+  );
 }

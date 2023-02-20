@@ -158,7 +158,6 @@ async function syncDataSource(): Promise<{ statusCode: number; body: string }> {
   }
 }\n`;
 
-// Create Service file
   _tree.create(
     `${projectName}/src/index.ts`,
     fileTemplate

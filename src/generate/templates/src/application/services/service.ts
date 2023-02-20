@@ -100,7 +100,7 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
   ${fieldPaginationMethod}
 }
 `;
-    // Create Service file
+
     _tree.create(
       `${projectName}/src/application/services/${strings.camelize(
         type.typeName
@@ -308,6 +308,8 @@ import { ${type.typeName}${strings.capitalize(relatedField.name)}Pagination } fr
   }
   return [paginationArgsImport, fieldPaginationImport, fieldPaginationMethod];
 }
+
+
 
 function handleSortingInstructions(type: Type): string {
   let sortingInstructions = '';

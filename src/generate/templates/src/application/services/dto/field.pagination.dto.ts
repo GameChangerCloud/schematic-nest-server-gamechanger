@@ -19,15 +19,14 @@ export class ${type.typeName}${strings.capitalize(relatedField.name)}Pagination 
   nodes: ${relatedField.type}[];
 }\n`;
 
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/application/services/dto/${
-        strings.camelize(type.typeName)
-    }/${
-        strings.camelize(type.typeName)
-    }-${
-        strings.camelize(relatedField.name)
-    }-pagination.dto.ts`,
-      fileTemplate
-    );
+  _tree.create(
+    `${projectName}/src/application/services/dto/${
+      strings.camelize(type.typeName)
+  }/${
+      strings.camelize(type.typeName)
+  }-${
+      strings.camelize(relatedField.name)
+  }-pagination.dto.ts`,
+    fileTemplate
+  );
 }

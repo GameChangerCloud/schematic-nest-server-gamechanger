@@ -25,7 +25,6 @@ export abstract class Node extends BaseEntity {${handleIdGeneration(types)[2]}
   updatedAt: Date;
 }\n`
   
-  // Create Service file
   _tree.create(
     `${projectName}/src/adapters/typeorm/entities/node.model.ts`,
     fileTemplate

@@ -86,7 +86,7 @@ function computeManyOnlyRelationships(types: Type[], manyOnlyType: Type): string
   types.forEach((type) => {
     const fieldInRelatedType = type.fields.find((field) => field.type === manyOnlyType.typeName)
     if (fieldInRelatedType && fieldInRelatedType.relationType === 'manyOnly') {
-      manyOnlyTemplate += `  ${strings.camelize(type.typeName)}Id: string;\n  ${strings.camelize(type.typeName)}: I${type.typeName};\n`;
+      manyOnlyTemplate += `  ${strings.camelize(type.typeName)}Id?: string;\n  ${strings.camelize(type.typeName)}?: I${type.typeName};\n`;
       entitiesToImport.push(`${type.typeName}`);
     }
   });

@@ -28,7 +28,6 @@ export class GraphQLYogaDriver extends AbstractGraphQLDriver {
   async stop() {}
 }\n`;
 
-// Create Service file
   _tree.create(
     `${projectName}/src/graphql-yoga-driver.ts`,
     fileTemplate

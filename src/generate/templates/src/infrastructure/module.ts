@@ -36,13 +36,13 @@ import { ${type.typeName}QueriesResolver } from 'infrastructure/resolvers/${stri
 })
 export class ${type.typeName}Module {}
 `;
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/infrastructure/modules/${strings.camelize(
-        type.typeName
-      )}.module.ts`,
-      fileTemplate
-    );
+
+  _tree.create(
+    `${projectName}/src/infrastructure/modules/${strings.camelize(
+      type.typeName
+    )}.module.ts`,
+    fileTemplate
+  );
 }
 
 function computeRelationalTemplates(type: Type): string[] {

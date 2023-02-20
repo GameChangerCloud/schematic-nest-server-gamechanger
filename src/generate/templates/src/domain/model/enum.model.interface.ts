@@ -7,29 +7,23 @@ export function createDomainModelEnumFile(
   _tree: Tree,
   projectName: string
 ) {
+  let template = generateEnumFileTemplate(type);
 
-  let typeName = type.typeName
-
-
-  // Create Service file
   _tree.create(
-    `${projectName}/src/domain/model/${strings.decamelize(typeName)}.ts`,
-    generateEnumFileTemplate(type)
+    `${projectName}/src/domain/model/${strings.decamelize(type.typeName)}.ts`,
+    template
   );
 }
 
-
 function generateEnumFileTemplate(type:Type): string{
-  let typeName = type.typeName
- 
- let enumListTemplate = ``
-type.values.forEach((value:string)=>{
-  enumListTemplate += `  ${value} = '${value.toLocaleLowerCase()}',\n`
-})
+  let enumListTemplate = ``;
+  type.values.forEach((value:string) => {
+    enumListTemplate += `  ${value} = '${value.toLocaleLowerCase()}',\n`
+  });
   let entityEnumListTemplate = 
-`export enum ${typeName} {
-${enumListTemplate}}`
+    `export enum ${type.typeName} {
+${enumListTemplate}}`;
 
-  return entityEnumListTemplate
+  return entityEnumListTemplate;
 }
 
