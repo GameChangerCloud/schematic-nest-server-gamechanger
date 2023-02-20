@@ -15,19 +15,18 @@ export function createDomainModelInterfaceFile(
 
   let domainModelInterfaceTemplate = 
 `import { INode } from './node.interface';
-${generateEntityRelationsModelImportsTemplate(type)}
+${generateEntityRelationsModelImportsTemplate(types, type)}
 export interface I${typeName} extends INode {
 ${generateEntityFieldsTemplate(types,type)}}
 `;
 
-  // Create Service file
   _tree.create(
     `${projectName}/src/domain/model/${strings.decamelize(type.typeName)}.interface.ts`,
     domainModelInterfaceTemplate
   );
 }
 
-function generateEntityRelationsModelImportsTemplate(type: Type): string {
+function generateEntityRelationsModelImportsTemplate(types: Type[], type: Type): string {
 
     let entityRelationsModelImportsTemplate = ''
 
@@ -39,7 +38,7 @@ function generateEntityRelationsModelImportsTemplate(type: Type): string {
         `import { ${interfacedPrefix}${strings.capitalize(field.type)} } from './${strings.camelize(field.type)}${interfacedField}';\n`
       }
     })
-
+    entityRelationsModelImportsTemplate += computeManyOnlyRelationships(types, type)[1];
     return entityRelationsModelImportsTemplate
 }
 
@@ -75,7 +74,24 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
           template += `  child${strings.capitalize(pluralize(field.name))}${nullField}: ${interfacedField}${TSfieldType}${arrayCharacter};\n  parent${strings.capitalize(pluralize(field.name, 1))}${nullField}: ${interfacedField}${TSfieldType};\n`;
         else template += `  ${strings.camelize(field.name)}${nullField}: ${interfacedField}${TSfieldType}${arrayCharacter};\n`;
       }
-    })    
+    });
+  template += computeManyOnlyRelationships(types, type)[0];   
   return template
 }
 
+function computeManyOnlyRelationships(types: Type[], manyOnlyType: Type): string[] {
+  let manyOnlyTemplate = ``;
+  let entitiesToImport: string[] = [];
+  let entitiesImportTemplate = ``;
+  types.forEach((type) => {
+    const fieldInRelatedType = type.fields.find((field) => field.type === manyOnlyType.typeName)
+    if (fieldInRelatedType && fieldInRelatedType.relationType === 'manyOnly') {
+      manyOnlyTemplate += `  ${strings.camelize(type.typeName)}Id: string;\n  ${strings.camelize(type.typeName)}: I${type.typeName};\n`;
+      entitiesToImport.push(`${type.typeName}`);
+    }
+  });
+  entitiesToImport.filter((item, index) => entitiesToImport.indexOf(item) === index);
+  entitiesToImport.forEach((entity) => entitiesImportTemplate += `import { I${entity} } from './${entity.toLowerCase()}.interface';\n`);
+
+  return [manyOnlyTemplate, entitiesImportTemplate];
+}

@@ -145,16 +145,6 @@ function generateEntityRelationsModelImportsTemplate(
         let importType = relatedType?.type === 'EnumTypeDefinition' ? 'enum' : 'model';
         entityRelationsModelImportsTemplate += `import { ${relation.type
           } } from './${strings.decamelize(relation.type)}.${importType}';\n`;
-        // console.log(`B : ${processedType.typeName}`);
-        // console.log(computeManyOnlyRelationships(types, processedType)[2]);
-        // if (manyOnlyRelationships.length > 0) {
-        //   console.log('coucou');
-        //   manyOnlyRelationships.forEach((entity) => {
-        //     entityRelationsModelImportsTemplate += `import { ${entity
-        //       } } from './${strings.decamelize(entity)}.model'; \n`;
-        //   })
-        // }
-
       }
 
     }
@@ -210,7 +200,6 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
         singleRelation += ` (${strings.decamelize(field.type)}) => ${strings.decamelize(field.type)}.${relatedFieldName},`;
       if (field.relationType === 'manyOnly')
         singleRelation += ` (${strings.decamelize(field.type)}) => ${strings.decamelize(field.type)}.${strings.camelize(type.typeName)},`;
-      //const singleRelation = field.relationType !== 'oneOnly' && field.relationType !== 'manyOnly' ? `, (${strings.decamelize(field.type)}) => ${strings.decamelize(field.type)}.${relatedFieldName},`: ','
       const relationDeleteOption = `{\n    onDelete: 'SET NULL',\n  }`;
       let arrayBracketStart = '';
       let arrayBracketEnd = ''
@@ -279,7 +268,6 @@ function computeManyOnlyRelationships(types: Type[], manyOnlyType: Type): [boole
   let importManyToOne = false;
   let entitiesToImport: string[] = [];
   let entitiesImportTemplate = ``;
-  //let manyOnlyRelationships = false;
   types.forEach((type) => {
     const fieldInRelatedType = type.fields.find((field) => field.type === manyOnlyType.typeName)
     if (fieldInRelatedType && fieldInRelatedType.relationType === 'manyOnly') {
