@@ -82,7 +82,7 @@ export function generate(_options: any): Rule {
         createCreateDto(type, _tree, _options.name);
         createDeleteDto(type, _tree, _options.name);
         createGetOneDto(type, _tree, _options.name);
-        createUpdateDto(type, _tree, _options.name);
+        createUpdateDto(types, type, _tree, _options.name);
         createEntityPaginationDto(type, _tree, _options.name);
         const relatedFields = type.fields.filter((field) => field.relation && !field.isEnum && !field.isDeprecated && field.relationType);
         if (relatedFields.length > 0) createFieldsResolver(type, relatedFields, _tree, _options.name);
