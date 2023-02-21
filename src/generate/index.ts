@@ -76,7 +76,7 @@ export function generate(_options: any): Rule {
 
     types.forEach((type) => {
       if (type.type === 'ObjectTypeDefinition' && type.isNotOperation()) {
-        createModule(type, _tree, _options.name);
+        createModule(types, type, _tree, _options.name);
         createServiceInterface(type, _tree, _options.name);
         createCreateDto(type, _tree, _options.name);
         createDeleteDto(type, _tree, _options.name);

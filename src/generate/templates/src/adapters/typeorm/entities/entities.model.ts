@@ -269,12 +269,12 @@ function computeManyOnlyRelationships(types: Type[], manyOnlyType: Type): [boole
   types.forEach((type) => {
     const fieldInRelatedType = type.fields.find((field) => field.type === manyOnlyType.typeName)
     if (fieldInRelatedType && fieldInRelatedType.relationType === 'manyOnly') {
-      manyOnlyTemplate += `\n
+      manyOnlyTemplate += `
   @ManyToOne(() => ${type.typeName}, (${strings.camelize(type.typeName)}) => ${strings.camelize(type.typeName)}.${fieldInRelatedType.name}, {
     onDelete: 'SET NULL',
   })
   @JoinColumn()
-  ${strings.camelize(type.typeName)}: ${type.typeName};
+  ${strings.camelize(type.typeName)}?: ${type.typeName};
 
   @RelationId((self: ${manyOnlyType.typeName}) => self.${strings.camelize(type.typeName)})
   readonly ${strings.camelize(type.typeName)}Id?: ${type.typeName}['id'] | null;`;

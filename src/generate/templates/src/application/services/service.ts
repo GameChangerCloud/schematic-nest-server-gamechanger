@@ -44,7 +44,9 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
     private readonly ${strings.camelize(type.typeName)}Repository: Repository<${type.typeName}>,${relatedRepositoryImport}${forwardReferencedServices}${referencedServices}
   ) {}
 
-  async ${strings.camelize(type.typeName)}Create(input: ${type.typeName}CreateInput): Promise<${type.typeName}CreateOutput> {
+  async ${strings.camelize(type.typeName)}Create(
+    input: ${type.typeName}CreateInput
+  ): Promise<${type.typeName}CreateOutput> {
     const ${strings.camelize(type.typeName)} = this.${strings.camelize(type.typeName)}Repository.create(input);${createRelationships}${initRelationships}${handleIdGeneration(type)[1]}
     await ${strings.camelize(type.typeName)}.save();
     return { ${strings.camelize(type.typeName)} };
@@ -61,7 +63,9 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
     return { ${strings.camelize(type.typeName)} };
   }
 
-  async ${strings.camelize(type.typeName)}Delete(${strings.camelize(type.typeName)}Id: ${type.typeName}['id']): Promise<${type.typeName}DeleteOutput> {
+  async ${strings.camelize(type.typeName)}Delete(
+    ${strings.camelize(type.typeName)}Id: ${type.typeName}['id']
+  ): Promise<${type.typeName}DeleteOutput> {
     const ${strings.camelize(type.typeName)} = await this.${strings.camelize(type.typeName)}Repository.findOneOrFail({
       where: { id: ${strings.camelize(type.typeName)}Id },
     });
@@ -69,7 +73,9 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
     return { ${strings.camelize(type.typeName)}Id };
   }
 
-  async ${strings.camelize(pluralize(type.typeName))}Pagination(args: ${pluralize(type.typeName)}PaginationArgs): Promise<${pluralize(type.typeName)}Pagination> {
+  async ${strings.camelize(pluralize(type.typeName))}Pagination(
+    args: ${pluralize(type.typeName)}PaginationArgs
+  ): Promise<${pluralize(type.typeName)}Pagination> {
     const queryBuilder = this.${strings.camelize(type.typeName)}Repository.createQueryBuilder('${strings.camelize(type.typeName)}');
     queryBuilder.take(args.take);
     queryBuilder.skip(args.skip);
@@ -85,14 +91,18 @@ export class ${type.typeName}Service implements I${type.typeName}Service {
     return { nodes, totalCount };
   }
 
-  async ${strings.camelize(type.typeName)}GetDataById(${strings.camelize(type.typeName)}Id: ${type.typeName}['id']): Promise<${type.typeName}GetOneOutput> {
+  async ${strings.camelize(type.typeName)}GetDataById(
+    ${strings.camelize(type.typeName)}Id: ${type.typeName}['id']
+  ): Promise<${type.typeName}GetOneOutput> {
     const ${strings.camelize(type.typeName)} = await this.${strings.camelize(type.typeName)}Repository.findOneOrFail({
       where: { id: ${strings.camelize(type.typeName)}Id },
     });
     return { ${strings.camelize(type.typeName)} };
   }
 
-  async ${strings.camelize(type.typeName)}GetById(${strings.camelize(type.typeName)}Id: ${type.typeName}['id']): Promise<${type.typeName}> {
+  async ${strings.camelize(type.typeName)}GetById(
+    ${strings.camelize(type.typeName)}Id: ${type.typeName}['id']
+  ): Promise<${type.typeName}> {
     return await this.${strings.camelize(type.typeName)}Repository.findOneOrFail({
       where: { id: ${strings.camelize(type.typeName)}Id },
     });
@@ -275,7 +285,7 @@ function computeForwardRelationships(types: Type[], type: Type): string[] {
     manyOnlyFields.forEach((manyOnlyField) => {
       forwardReferencedServices += `\n    @Inject(forwardRef(() => ${strings.capitalize(manyOnlyField.type)}Service))
     private readonly ${strings.camelize(manyOnlyField.type)}Service: ${strings.capitalize(manyOnlyField.type)}Service,`;
-    })
+    });
   }
 
   return [forwardRelationshipImport, forwardReferencedServices, referencedServices];
@@ -360,20 +370,15 @@ import { ${type.typeName}${strings.capitalize(manyOnlyField.name)}Pagination } f
 }
 
 function computeManyOnlyRelationships(types: Type[], manyOnlyType: Type): [boolean, string, string, string, string] {
-  //let manyOnlyTemplate = ``;
   let forwardRefAndInjectImport = false;
   let importEntitiesAndServicesTemplate = ``;
   let injectServicesTemplate = ``;
   let createEntityTemplate = ``;
   let updateEntityTemplate = ``;
-  //let entitiesToImport: string[] = [];
-  //let entitiesImportTemplate = ``;
   types.forEach((type) => {
     const fieldInRelatedType = type.fields.find((field) => field.type === manyOnlyType.typeName)
     if (fieldInRelatedType && fieldInRelatedType.relationType === 'manyOnly') {
       forwardRefAndInjectImport = true;
-      // manyOnlyTemplate += `  ${strings.camelize(type.typeName)}Id?: string;\n  ${strings.camelize(type.typeName)}?: I${type.typeName};\n`;
-      // entitiesToImport.push(`${type.typeName}`);
       importEntitiesAndServicesTemplate += `\nimport { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';
 import { ${type.typeName}Service } from './${strings.camelize(type.typeName)}.service';`;
       injectServicesTemplate += `\n    @Inject(forwardRef(() => ${type.typeName}Service))
@@ -390,13 +395,9 @@ import { ${type.typeName}Service } from './${strings.camelize(type.typeName)}.se
     }`;
     }
   });
-  //entitiesToImport.filter((item, index) => entitiesToImport.indexOf(item) === index);
-  //entitiesToImport.forEach((entity) => entitiesImportTemplate += `import { I${entity} } from './${entity.toLowerCase()}.interface';\n`);
 
   return [forwardRefAndInjectImport, importEntitiesAndServicesTemplate, injectServicesTemplate, createEntityTemplate, updateEntityTemplate];
 }
-
-
 
 function handleSortingInstructions(type: Type): string {
   let sortingInstructions = '';
