@@ -229,7 +229,9 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
       }
     });
   }
-  if (computeManyOnlyRelationships(types, type)[0] && !forwardRefAndInjectImport.includes('Inject') && !forwardRefAndInjectImport.includes('forwardRef')) forwardRefAndInjectImport += 'Inject, forwardRef, ';
+  if (computeManyOnlyRelationships(types, type)[0] 
+    && !forwardRefAndInjectImport.includes('Inject') 
+    && !forwardRefAndInjectImport.includes('forwardRef')) forwardRefAndInjectImport += 'forwardRef, Inject, ';
   modelsAndServices += computeManyOnlyRelationships(types, type)[1];
   initRelationships += computeManyOnlyRelationships(types, type)[3];
   updateRelationships += computeManyOnlyRelationships(types, type)[4];
@@ -269,7 +271,7 @@ function computeForwardRelationships(types: Type[], type: Type): string[] {
   forwardReferencedServices += computeManyOnlyRelationships(types, type)[2];
   const manyOnlyFields = relatedFields.filter(field => field.relationType === 'manyOnly');
   if (manyOnlyFields.length > 0) {
-    if (!forwardRelationshipImport.includes('forwardRef') && !forwardRelationshipImport.includes('Inject')) forwardRelationshipImport = 'forwardRef, Inject, ';
+    if (!forwardRelationshipImport.includes('forwardRef')) forwardRelationshipImport = 'forwardRef, ';
     manyOnlyFields.forEach((manyOnlyField) => {
       forwardReferencedServices += `\n    @Inject(forwardRef(() => ${strings.capitalize(manyOnlyField.type)}Service))
     private readonly ${strings.camelize(manyOnlyField.type)}Service: ${strings.capitalize(manyOnlyField.type)}Service,`;
