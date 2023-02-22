@@ -25,13 +25,21 @@ And then run the following commands to initialize Terraform and apply the aws co
 ```bash
 export AWS_DEFAULT_REGION=eu-west-1
 terraform init
-terraform apply -var-file="terraform.tfvar"
+terraform apply -var-file="terraform.tfvars"
 ```
 
 >Make sure to set your region as the value of AWS_DEFAULT_REGION
 
 Once the apply is complete, you should be able to see the generated Lambda and RDS base on the AWS console.
 You can then pass queries to the Lambda through the Test tab.
+
+To end your session and destroy the AWS resources, you can execute the following command : 
+
+```bash
+terraform destroy -var-file="terraform.tfvars"
+```
+
+>We strongly recommend that you execute this command twice as the first one may not have destroyed every ressource correctly
 
 ### Testing locally using SAM
 
