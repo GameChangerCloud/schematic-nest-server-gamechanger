@@ -42,13 +42,13 @@ export interface I${type.typeName}Service {
   ${strings.camelize(type.typeName)}GetDataById(id: ${type.typeName}['id']): Promise<${type.typeName}GetOneOutput>;${fieldPagination}
 }
 `;
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/domain/service/${strings.camelize(
-        type.typeName
-      )}.service.interface.ts`,
-      fileTemplate
-    );
+
+  _tree.create(
+    `${projectName}/src/domain/service/${strings.camelize(
+      type.typeName
+    )}.service.interface.ts`,
+    fileTemplate
+  );
 }
 
 function computeFieldPagination(type: Type): string[] {

@@ -40,7 +40,6 @@ if (process.env.DATABASE_HOST) {
 
 export { AppDataSource };\n`;
 
-  // Create Service file
   _tree.create(
     `${projectName}/src/adapters/typeorm/datasource.ts`,
     fileTemplate

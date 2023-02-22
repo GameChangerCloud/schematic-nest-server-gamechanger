@@ -15,7 +15,6 @@ registerEnumType(${typeName}, {
   name: '${typeName}',
 });\n`
   
-  // Create Service file
   _tree.create(
     `${projectName}/src/adapters/typeorm/entities/${strings.decamelize(type.typeName)}.enum.ts`,
     enumFileTemplate

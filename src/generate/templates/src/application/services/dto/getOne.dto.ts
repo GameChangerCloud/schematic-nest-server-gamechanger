@@ -13,13 +13,12 @@ import { ${type.typeName}CreateOutput } from './${strings.camelize(type.typeName
 @ObjectType('${type.typeName}GetOneOutput')
 export class ${type.typeName}GetOneOutput extends ${type.typeName}CreateOutput {}\n`;
 
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/application/services/dto/${strings.camelize(
-        type.typeName
-      )}/${strings.camelize(
-        type.typeName
-      )}-getOne.dto.ts`,
-      fileTemplate
-    );
+  _tree.create(
+    `${projectName}/src/application/services/dto/${strings.camelize(
+      type.typeName
+    )}/${strings.camelize(
+      type.typeName
+    )}-getOne.dto.ts`,
+    fileTemplate
+  );
 }

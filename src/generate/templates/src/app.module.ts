@@ -81,7 +81,7 @@ import { GraphQLYogaDriver } from './graphql-yoga-driver';
   ],
 })
 export class AppModule {}\n`;
-  // Create Service file
+
   _tree.create(
     `${projectName}/src/app.module.ts`,
     fileTemplate

@@ -32,15 +32,14 @@ export class ${pluralize(type.typeName)}Pagination extends Pagination {
   nodes: ${type.typeName}[];
 }\n`;
 
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/application/services/dto/${
-        type.typeName.toLowerCase()
-    }/${
-        type.typeName.toLowerCase()
-    }-pagination.dto.ts`,
-      fileTemplate
-    );
+  _tree.create(
+    `${projectName}/src/application/services/dto/${
+      type.typeName.toLowerCase()
+  }/${
+      type.typeName.toLowerCase()
+  }-pagination.dto.ts`,
+    fileTemplate
+  );
 }
 
 function handleSortingArguments(type: Type): string {

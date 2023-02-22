@@ -32,6 +32,7 @@ export class ${type.typeName}QueriesResolver {
   ) {
     return this.${strings.camelize(pluralize(type.typeName))}Service.${strings.camelize(type.typeName)}GetDataById(${strings.camelize(type.typeName)}Id);
   }
+
 }\n`;
     // Create Service file
     _tree.create(

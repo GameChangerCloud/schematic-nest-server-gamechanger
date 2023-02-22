@@ -15,7 +15,7 @@
     "graphql-file": {
       "description": "Path of the graphQl schema",
       "minLength": 1,
-      "default": "schema.graphql",
+      "default": "movie-scalar.graphql",
       "x-prompt": "Please fill the name of your graphQL schema (ex : astronauts.graphql)"
     }
   },

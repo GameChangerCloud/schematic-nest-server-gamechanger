@@ -16,13 +16,12 @@ export class ${type.typeName}DeleteOutput {
   ${strings.camelize(type.typeName)}Id: ${type.typeName}['id'];
 }\n`;
 
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/application/services/dto/${strings.camelize(
-        type.typeName
-      )}/${strings.camelize(
-        type.typeName
-      )}-delete.dto.ts`,
-      fileTemplate
-    );
+  _tree.create(
+    `${projectName}/src/application/services/dto/${strings.camelize(
+      type.typeName
+    )}/${strings.camelize(
+      type.typeName
+    )}-delete.dto.ts`,
+    fileTemplate
+  );
 }

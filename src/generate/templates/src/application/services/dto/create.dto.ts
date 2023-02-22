@@ -21,15 +21,15 @@ export class ${type.typeName}CreateInput extends ${type.typeName}UpdateInput {${
 export class ${type.typeName}CreateOutput extends ${type.typeName}UpdateOutput {}
 `;
 
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/application/services/dto/${strings.camelize(
-        type.typeName
-      )}/${strings.camelize(
-        type.typeName
-      )}-create.dto.ts`,
-      fileTemplate
-    );
+
+  _tree.create(
+    `${projectName}/src/application/services/dto/${strings.camelize(
+      type.typeName
+    )}/${strings.camelize(
+      type.typeName
+    )}-create.dto.ts`,
+    fileTemplate
+  );
 }
 
 function handleIdField(type: Type): string[] {

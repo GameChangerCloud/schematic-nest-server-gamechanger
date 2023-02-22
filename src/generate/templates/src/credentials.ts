@@ -17,7 +17,6 @@ export function createCredentials(
   DATABASE_DB: 'postgres',
 };\n`;
 
-// Create Service file
     _tree.create(
     `${projectName}/src/config/credentials.ts`,
     fileTemplate

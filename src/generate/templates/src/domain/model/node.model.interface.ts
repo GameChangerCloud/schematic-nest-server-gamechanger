@@ -14,7 +14,6 @@ export function createNodeModelInterface(
 }
 `;
 
-  // Create Service file
   _tree.create(
     `${projectName}/src/domain/model/node.interface.ts`,
     domainModelInterfaceTemplate

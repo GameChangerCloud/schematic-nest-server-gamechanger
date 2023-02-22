@@ -15,7 +15,6 @@ async function bootstrap() {
 }
 bootstrap();\n`;
 
-// Create Service file
   _tree.create(
     `${projectName}/src/main.ts`,
     fileTemplate

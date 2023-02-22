@@ -5,16 +5,16 @@ import { Field } from 'easygraphql-parser-gamechanger/dist/models/field';
 const pluralize = require('pluralize');
 
 export function createUpdateDto(
+  types: Type[],
     type: Type,
     _tree: Tree,
     projectName: string
 ) {
-    const importTemplate = computeImportsTemplate(type);
+    const importTemplate = computeImportsTemplate(types, type);
     const [stdScalarsTemplate, validatorsImportTemplate] = computeScalarsTemplate(type);
-    const stdRelationshipsTemplate = computeRelationshipsTemplate(type);
+    const stdRelationshipsTemplate = computeRelationshipsTemplate(types, type);
 
     let fileTemplate = `import { Field, InputType, ObjectType } from '@nestjs/graphql';
-
 import { ${type.typeName} } from 'adapters/typeorm/entities/${strings.camelize(type.typeName)}.model';${importTemplate}${validatorsImportTemplate}
 
 @InputType('${type.typeName}UpdateInput')
@@ -28,18 +28,17 @@ export class ${type.typeName}UpdateOutput {
 }
 `;
 
-    // Create Service file
-    _tree.create(
-      `${projectName}/src/application/services/dto/${strings.camelize(
-        type.typeName
-      )}/${strings.camelize(
-        type.typeName
-      )}-update.dto.ts`,
-      fileTemplate
-    );
+  _tree.create(
+    `${projectName}/src/application/services/dto/${strings.camelize(
+      type.typeName
+    )}/${strings.camelize(
+      type.typeName
+    )}-update.dto.ts`,
+    fileTemplate
+  );
 }
 
-function computeImportsTemplate(type: Type): string {
+function computeImportsTemplate(types: Type[], type: Type): string {
   let importTemplate = ``;
   const enums = type.fields.filter(field => field.isEnum && !field.isDeprecated);
   const relationships = type.fields.filter(field => field.relation && !field.isDeprecated && !field.isEnum);
@@ -53,7 +52,7 @@ function computeImportsTemplate(type: Type): string {
       importTemplate += relationshipTemplate;
     }
   })
-
+  importTemplate += computeManyOnlyRelationships(types, type)[1];
   return importTemplate;
 }
 
@@ -96,12 +95,11 @@ function computeScalarsTemplate(type: Type): string[] {
     let totalValidators = validatorsToImportFromDirective.concat(typeValidatorsToImport);
     validatorsImportTemplate = `\nimport { ${totalValidators.join(', ')} } from 'class-validator';`;
   }
-  
 
   return [stdScalarsTemplate, validatorsImportTemplate];
 }
 
-function computeRelationshipsTemplate(type: Type): string {
+function computeRelationshipsTemplate(types: Type[], type: Type): string {
   let relationshipsAndEnumsTemplate = ``;
   const enums = type.fields.filter(field => field.isEnum && !field.isDeprecated);
   const relationships = type.fields.filter(field => field.relation && !field.isDeprecated && !field.isEnum);
@@ -130,13 +128,30 @@ function computeRelationshipsTemplate(type: Type): string {
   }
   relationshipsAndEnumsTemplate += relationshipsTemplate;
   });
-
+  relationshipsAndEnumsTemplate += computeManyOnlyRelationships(types, type)[0];
   return relationshipsAndEnumsTemplate;
+}
+
+function computeManyOnlyRelationships(types: Type[], manyOnlyType: Type): string[] {
+  let manyOnlyTemplate = ``;
+  let entitiesToImport: string[] = [];
+  let entitiesImportTemplate = ``;
+  types.forEach((type) => {
+    const fieldInRelatedType = type.fields.find((field) => field.type === manyOnlyType.typeName)
+    if (fieldInRelatedType && fieldInRelatedType.relationType === 'manyOnly') {
+      manyOnlyTemplate += `  @Field(() => String, { nullable: true })
+  ${strings.camelize(type.typeName)}Id?: ${type.typeName}['id'] | null;\n\n`;
+      entitiesToImport.push(`${type.typeName}`);
+    }
+  });
+  entitiesToImport.filter((item, index) => entitiesToImport.indexOf(item) === index);
+  entitiesToImport.forEach((entity) => entitiesImportTemplate += `import { ${entity} } from 'adapters/typeorm/entities/${entity.toLowerCase()}.model';`);
+
+  return [manyOnlyTemplate, entitiesImportTemplate];
 }
 
 function computeFieldDirective(scalar: Field, scalarType: string, validatorsToImport: string[]): [string, string[]] {
   let directiveTemplate = getTypeValidators(scalar);
-  console.log()
   if (scalarType === 'String') {
     const lengthDirective = scalar.directives.find((dir: { name: string, args: { name: string, value: string }[] }) => dir.name === 'length');
     if (lengthDirective) {
