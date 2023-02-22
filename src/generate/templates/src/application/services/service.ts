@@ -159,7 +159,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
           const child${strings.capitalize(relationship.type)} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
             where: { id: input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i] },
           });
-          ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))}[i].id = child${strings.capitalize(relationship.type)}.id;
+          ${strings.camelize(type.typeName)}.child${strings.capitalize(pluralize(relationship.name))}[i] = child${strings.capitalize(relationship.type)};
         }
       }
     }`;
@@ -185,7 +185,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
         const ${strings.camelize(pluralize(relationship.name, 1))} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(
           input.${strings.camelize(pluralize(relationship.name, 1))}Ids[i],
         );
-        ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)}[i].id = ${strings.camelize(pluralize(relationship.name, 1))}.id;
+        ${strings.camelize(type.typeName)}.${strings.camelize(relationship.name)}[i] = ${strings.camelize(pluralize(relationship.name, 1))};
       }
     }`;
           updateRelationships += `
@@ -213,7 +213,7 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
       const ${relationship.name} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
         where: { id: input.${relationship.name}Id },
       });
-      ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
+      ${strings.camelize(type.typeName)}.${relationship.name} = ${relationship.name};
     }`;
           updateRelationships += `
     if (input.${relationship.name}Id && input.${relationship.name}Id !== ${strings.camelize(type.typeName)}.id)) {
@@ -221,19 +221,19 @@ import { ${relationship.type}Service } from './${strings.camelize(relationship.t
       const ${relationship.name} = await this.${strings.camelize(relationship.type)}Repository.findOneOrFail({
         where: { id: input.${relationship.name}Id },
       });
-      ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
+      ${strings.camelize(type.typeName)}.${relationship.name} = ${relationship.name};
     }`;
         } else {
           initRelationships += `
     if (input.${relationship.name}Id) {
       const ${relationship.name} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(input.${relationship.name}Id);
-      ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
+      ${strings.camelize(type.typeName)}.${relationship.name} = ${relationship.name};
     }`;
           updateRelationships += `
     if (input.${relationship.name}Id) {
       ${strings.camelize(type.typeName)}.${relationship.name} = new ${relationship.type}();
       const ${relationship.name} = await this.${strings.camelize(relationship.type)}Service.${strings.camelize(relationship.type)}GetById(input.${relationship.name}Id);
-      ${strings.camelize(type.typeName)}.${relationship.name}.id = ${relationship.name}.id;
+      ${strings.camelize(type.typeName)}.${relationship.name} = ${relationship.name};
     }`;
         }
       }
@@ -386,12 +386,12 @@ import { ${type.typeName}Service } from './${strings.camelize(type.typeName)}.se
       createEntityTemplate += `\n  ${strings.camelize(manyOnlyType.typeName)}.${strings.camelize(type.typeName)} = new ${type.typeName}();
     if (input.${strings.camelize(type.typeName)}Id) {
       const ${strings.camelize(type.typeName)} = await this.${strings.camelize(type.typeName)}Service.${strings.camelize(type.typeName)}GetById(input.${strings.camelize(type.typeName)}Id);
-      ${strings.camelize(manyOnlyType.typeName)}.${strings.camelize(type.typeName)}.id = ${strings.camelize(type.typeName)}.id;
+      ${strings.camelize(manyOnlyType.typeName)}.${strings.camelize(type.typeName)} = ${strings.camelize(type.typeName)};
     }`;
       updateEntityTemplate += `\n  if (input.${strings.camelize(type.typeName)}Id) {
       ${strings.camelize(manyOnlyType.typeName)}.${strings.camelize(type.typeName)} = new ${type.typeName}();
       const ${strings.camelize(type.typeName)} = await this.${strings.camelize(type.typeName)}Service.${strings.camelize(type.typeName)}GetById(input.${strings.camelize(type.typeName)}Id);
-      ${strings.camelize(manyOnlyType.typeName)}.${strings.camelize(type.typeName)}.id = ${strings.camelize(type.typeName)}.id;
+      ${strings.camelize(manyOnlyType.typeName)}.${strings.camelize(type.typeName)} = ${strings.camelize(type.typeName)};
     }`;
     }
   });
