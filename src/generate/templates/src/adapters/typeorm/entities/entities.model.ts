@@ -230,12 +230,15 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
   })
   parent${strings.capitalize(pluralize(field.name, 1))}${field.noNull ? '' : '?'}: ${field.type};
 
+  @RelationId((self: ${type.typeName}) => self.parent${strings.capitalize(pluralize(field.name, 1))})
+  readonly parent${strings.capitalize(pluralize(field.name, 1))}Id?: ${type.typeName}['id'] | null;
+
   @OneToMany(() => ${field.type}, (${strings.camelize(field.type)}) => ${strings.camelize(field.type)}.parent${strings.capitalize(pluralize(field.name, 1))}, {
     onDelete: 'SET NULL',
   })
   child${strings.capitalize(pluralize(field.name))}${field.noNull ? '' : '?'}: ${field.type}[];\n
   @RelationId((self: ${type.typeName}) => self.child${strings.capitalize(pluralize(field.name))})
-  readonly child${strings.capitalize(pluralize(field.name, 1))}Ids?: ${field.type}['id'][] | null;\n`
+  readonly child${strings.capitalize(pluralize(field.name))}Ids?: ${field.type}['id'][] | null;\n`
     }
   })
 

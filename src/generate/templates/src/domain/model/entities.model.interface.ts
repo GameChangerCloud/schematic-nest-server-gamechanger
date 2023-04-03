@@ -65,8 +65,9 @@ function generateEntityFieldsTemplate(types: Type[], type: Type): string {
       if (field.type.includes('Int') || field.type === 'Float') TSfieldType = 'Number';
       if(!field.isEnum && field.relation) {
         interfacedField = 'I';
-        if (field.relationType === 'selfJoinMany') template += `  child${strings.camelize(pluralize(field.name, 1))}Ids?: string[];\n  parent${strings.camelize(pluralize(field.name, 1))}Id?: string;\n`;
-        template += `  ${strings.camelize(pluralize(field.name, 1))}Id${plurals}?: string${arrayCharacter};\n`;
+        if (field.relationType === 'selfJoinMany') 
+          template += `  child${strings.capitalize(pluralize(field.name))}Ids?: string[];\n  parent${strings.capitalize(pluralize(field.name, 1))}Id?: string;\n`;
+        else template += `  ${strings.camelize(pluralize(field.name, 1))}Id${plurals}?: string${arrayCharacter};\n`;
       }
       if(field.type !== 'ID'){
         if (!field.relation) template += `  ${strings.camelize(field.name)}${nullField}: ${interfacedField}${strings.camelize(TSfieldType)}${arrayCharacter};\n`;
